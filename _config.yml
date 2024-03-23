@@ -1,15 +1,15 @@
 # Configurations
-title:            Jekyll Gitbook
-longtitle:        Jekyll Gitbook
-author:           HE Tao
-email:            sighingnow@gmail.com
+title:            SQLAlchemy Workshop
+longtitle:        SQLAlchemy Workshop
+author:           Aya Elsayed
+email:            ayah.ehab11@gmail.com
 description: >
-  Build Jekyll site with the GitBook style.
+  SQLAlchemy workshop
 
 version:          1.0
 gitbook_version:  3.2.3
 
-url:              'https://sighingnow.github.io'
+url:              'https://aelsayed95.github.io/sqlalchemy-wkshop/'
 baseurl:          '/jekyll-gitbook'
 rss:              RSS
 
@@ -36,7 +36,7 @@ kramdown:
   syntax_highlighter_opts:
     guess_lang:           true
 
-syntax_highlighter_style: colorful
+syntax_highlighter_style: github
 
 markdown_ext:             markdown,mkdown,mkdn,mkd,md
 
