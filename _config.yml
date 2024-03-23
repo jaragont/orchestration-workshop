@@ -9,8 +9,8 @@ description: >
 version:          1.0
 gitbook_version:  3.2.3
 
-url:              'https://aelsayed95.github.io/sqlalchemy-wkshop/'
-baseurl:          '/jekyll-gitbook'
+url:              'https://aelsayed95.github.io/'
+baseurl:          ''
 rss:              RSS
 
 # bootstrap: use the remote theme for the site itself
