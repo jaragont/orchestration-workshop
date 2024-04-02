@@ -25,7 +25,7 @@ Throughout this workshop, we'll be using an example project `MarketPlace` (TODO:
 It is a simple micro-service that manages a `postgres` database of orders, shops, customers data.
 The micro-service currently uses raw SQL to manage the database, we'll be incrementally working on it to replace the raw SQL with SQLAlchemy, make use of ORMs and optimise our access patterns.
 
-After each step, you can refer to the corresponding completed version of the code, under `solutions/step-##`.
+After each step, you can refer to the corresponding completed version of the code, under the branch `step-#-<step-title>`.
 
 Now, let's get started!
 
@@ -35,13 +35,24 @@ Now, let's get started!
 
 3. You'll be prompted to name your new repository. Select "public" and name your repository `<YourName>MarketPlace`
 
+## Useful Extensions
+
+In this tutorial, there are two useful VS Code extensions that will make your development experience smoother:
+
+1. The [Python extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+
+2. The [Docker extension](https://code.visualstudio.com/docs/containers/overview#_installation)
+
+To install them, find the extensions tab in the left panel of Codespaces, and search for each of the extensions.
+They are both provided by Microsoft.
+
 ## Creating a virtual environment
 
-To make our development experience smoother, we'll be installing the python dependencies we use in a Python virtual environment (`venv`).
+To make our development experience smoother, with intellisense and auto-complete, we'll be installing the python dependencies we use in a Python virtual environment (`venv`).
 Then, we'll point Codespaces to our `venv` path so that it intellisense can work and we can easily navigate to modules we use in our code.
 
-1. Find the extensions tab in the left panel of Codespaces, and search for the `Python` extension, provided by Microsoft.
-Install the extension and make sure it is enabled for your project.
+1. In the previous section, you should have installed the `Python` extension.
+If you haven't done so already, please do that now.
 
 2. Run the following commands to create and activate a `Python3.12` `venv`:
 
