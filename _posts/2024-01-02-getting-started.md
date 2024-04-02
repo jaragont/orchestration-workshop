@@ -73,6 +73,17 @@ Finally, we can communicate with our flask app over port `9090` as you can see i
     - 9090:9090
 ```
 
+In the previous step, we've created a `venv` to make developing `marketsvc` easier.
+Now that we're familiar with these files, let's install the dependencies in our virtual environment.
+You will need to repeat this step when we add new packages to `marketsvc/requirements.txt`
+
+```sh
+python -m pip install -r marketsvc/requirements.txt
+```
+
+To verify that intellisense now works correctly, open up any `.py` file in your project.
+`cmd`+click on any import in your file, you should be taken to the source file of the corresponding module.
+
 ## Running our services
 
 Now that we know what to expect, let's run our containers and give them a quick test.
