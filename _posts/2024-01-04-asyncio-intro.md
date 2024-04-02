@@ -190,10 +190,30 @@ Run the file and play around with the delay values:
 python 04-task_groups.py
 ```
 
+## async for
+
+Open the file `05-async_for.py`.
+This file introduces new syntax `async for`. How does it work?
+
+It is used to loop over an `asynchronous iterable`.
+An `asynchronous iterator` is an object that implements `__aiter__()` and `__anext__()`, the asynchronous counterparts to `__iter__()` and `__next__()` [6].
+
+Go ahead and run the file:
+
+```sh
+python 05-async_for.py
+```
+
+you'll notice that each loop iteration executes when the async generator has produced a new value.
+This can be useful so that you can do other work while waiting for values to be produced.
+
+As an example, uncomment L25-L29 and re-run the file.
+You can see that we can schedule other work to be done while waiting on the async generator.
+
 ## Using Queues
 
 The last concept we will look at today is `asyncio.Queue`.
-In our example `05-customers-shops`, we create two sets of tasks:
+In our example `06-customers-shops`, we create two sets of tasks:
 
 1. `customers`: who place orders on the queue
 
@@ -228,3 +248,4 @@ This raises the `asyncio.exceptions.CancelledError` exception, which we have cho
 3. [https://docs.python.org/3/library/asyncio-task.html#asyncio.Task](https://docs.python.org/3/library/asyncio-task.html#asyncio.Task)
 4. [https://docs.python.org/3/library/asyncio-task.html#asyncio.gather](https://docs.python.org/3/library/asyncio-task.html#asyncio.gather)
 5. [https://docs.python.org/3/library/asyncio-task.html#asyncio.TaskGroup](https://docs.python.org/3/library/asyncio-task.html#asyncio.TaskGroup)
+6. [https://docs.python.org/3/glossary.html#term-asynchronous-iterator](https://docs.python.org/3/glossary.html#term-asynchronous-iterator)
