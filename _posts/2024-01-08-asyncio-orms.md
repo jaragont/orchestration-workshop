@@ -14,139 +14,108 @@ To start, checkout the branch `step-7-asyncio-orms`:
 git checkout step-7-asyncio-orms
 ```
 
-This essentially builds on the work we've done in `step-6-sqlalchemy` but also brings back the `db/` ORM files we've built in step 3.
+This essentially builds on the work we've done in `step-3-orms` but uses the async engine we added in the previous step.
 
-```sh
-python -m pip install -r marketsvc/requirements.txt
+So in this step, we'll learn how to use the async version of [the 2.0 style queries](https://docs.sqlalchemy.org/en/14/glossary.html#term-2.0-style) we learned about in `step-3-orms`.
+
+To do this, we'll use [`AsyncSession`](https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncSession).
+
+So let's start in `db/base.py` add the following imports:
+
+```py
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncAttrs
+from sqlalchemy.ext.asyncio import async_sessionmaker
 ```
 
-Now, let's read through a few key files.
+Next, replace the `engine` definition with:
 
-### server.py
+```py
+def async_session_maker():
+    engine = create_async_engine(url_object, echo=True)
+    return async_sessionmaker(engine, expire_on_commit=False)
+```
 
-You'll notice here a number of requests that have an async implementation use the keyword `async`.
+This returns an `AsyncSession` object that we can use in `db_accessor.py`.
 
-For requests where we anticipate a potentially large number of items to be returned, an async generator was used in the implementation.
-For example, in `/api/customers`, `get_customers()` returns an async generator that we then consume to return a response.
-In a real life example, you may want to opt for a multi-part response to your request so that you don't have to load all the contents in memory at once.
+Finally, we need to update our `Base` class to use the `AsyncAttrs` mixin.
+This mixin allows us to access attributes of any ORM class as an awaitable through the `.awaitable_attrs` attribute.
+This is useful for attributes with lazy/deferred loading, as accessing the attribute directly will mean an implicit IO call to the database.
+To prevent implicit IO calls with `asyncio`, we access lazily-loaded attributes as awaitables like so:
 
-For requests that don't require large amounts of data to be loaded in memory, like `/api/order_total`, we simply `await` the async version of the implementation, before we return the response.
+```py
+await my_obj.awaitable_attrs.my_attr
+```
 
-You'll also notice, there's a new request `/api/orders_total` which calculates the total cost of a list of given order ids.
-This request exercises `asyncio.TaskGroup()` which we've learned about in the previous step.
-It kicks off a number of concurrent tasks `get_total_cost_of_an_order()` for each order.
-When they are done, it returns a list of the results of all the tasks.
+Note that SQLAlchemy will throw an exception if an implicit IO call is made.
 
-### db_accessor.py
+We elected to use `expire_on_commit=False` so we can access queried objects after a `session.commit()`
 
-Let's start by looking at `get_customers()`.
-As we saw in `server.py`, we expect an async generator here, so how do we achieve that?
 
-Look at the implementation of `stream_query()`.
-You'll notice that we've used `asyncpg`'s [`conn.cursor()`](https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.connection.Connection.cursor) here, which is compatible with the `async for` syntax.
-We then yield one dictionary row at a time, which is what we end up sending as a json response.
+> ##### WARNING
+> 
+> The AsyncSession object is a mutable, stateful object which represents a single, stateful database transaction in progress.
+> Using concurrent tasks with `asyncio`, with APIs such as `asyncio.gather()` for example, should use a separate AsyncSession per individual task.
+> See [this link](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#using-asyncsession-with-concurrent-tasks) for more info.
+{: .block-warning }
+
+
+## Updating the DB Queries
+
+Now we are ready to update our queries.
+
+Let's start with `get_customers()`.
+
+First, we replace the `Session` with an `AsyncSession`:
+
+```py
+async def get_customers():
+    async_session = async_session_maker()
+    async with async_session() as session:
+```
+
+Using the session's context manager means we do not have to explicitly call session.close() when we are done. 
+
+Next, since we want to stream one customer object at a time rather query them all at once, we'll use the `stream_scalars()` API:
+
+```py
+        async for customer in await session.stream_scalars(stmt):
+            yield customer.as_dict()
+```
 
 > ##### Test Your Understanding
-> Why is `get_customers()` a regular method not an `async` one?
+>
+> `customer.as_dict()` accesses `customer.address`. Why does SQLAlchemy not complain that we do not await the load of `customer.address`?
+>
+> _HINT_: what type of loading is used for `address` in the `Customer` ORM class?
 {: .block-tip }
 
-In contrast, let's look at `get_total_cost_of_an_order()`.
-Since we just expect a single number here as a response, we await `execute_query()`, which is implemented using `asyncpg`'s [`conn.fetch()`](https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.connection.Connection.fetch) interface.
-We simply await the query execution and return the sum.
-While this on it's own is not a very useful async request, it becomes useful when you want to perform multiple concurrent actions, like in `/api/orders_total`.
 
-Feel free to stop here and run the service:
-
-```sh
-docker compose build
-docker compose up
-```
-
-## Adding SQLAlchemy
-
-We now want to replace the vanilla `asyncpg` library with `SQLAlchemy` so we can get the same benefits we got with our sync service.
-
-First, we'll add back `sqlalchemy` to our requirements.txt:
-
-```txt
-flask[async]
-asyncpg
-sqlalchemy
-```
-
-Next, we want to create an async SQLAlchemy engine.
-Like we did in step 3, create a new file `marketsvc/db/base.py` with the following contents:
+Next, let's update `get_total_cost_of_an_order()`.
+As we don't need to stream a series of results here, all we need to do is just use the `async` version of the session and `await` the `execute` statement:
 
 ```py
-import os
-from sqlalchemy import create_engine, URL
-from sqlalchemy.ext.asyncio import create_async_engine
-
-DB_USER = os.environ.get("POSTGRES_USER")
-DB_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
-DB_PORT = os.environ.get("POSTGRES_PORT")
-DB_NAME = os.environ.get("POSTGRES_DB")
-DB_HOST = "marketdb"
-
-url_object = URL.create(
-    "postgresql+asyncpg",
-    username=DB_USER,
-    password=DB_PASSWORD,
-    host=DB_HOST,
-    database=DB_NAME,
-    port=DB_PORT,
-)
-
-
-def create_engine():
-    return create_async_engine(url_object, echo=True)
+async def get_total_cost_of_an_order(order_id):
+    async_session = async_session_maker()
+    async with async_session() as session:
+        result = await session.execute(
+            select(func.sum(Item.price * OrderItems.quantity).label("total_cost"))
+            .join(Orders.order_items)
+            .join(OrderItems.item)
+            .where(Orders.id == order_id)
+        )
+        return result.scalar()
 ```
 
-Do these steps look familiar?
-There are two key differences here:
+Finally, we'll walk you through updating `insert_order_items()`.
+Again, we use the `async` version of the `session`.
+What operations do you think we need to `await` here?
 
-1. the dialect of postgres in the `URL` object is now `asyncpg`, so we use `"postgresql+asyncpg"`.
-2. we now use `create_async_engine()` to create an [`AsyncEngine`](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncEngine).
-    `echo=True` enables log output.
+- `session.execute()`
+- `session.flush()`
+- `session.commit()`
 
-Next, we'll update the functions that execute our queries to use SQLAlchemy.
+Continue the rest of the queries now.
 
-For `execute_query()`, update it to the following:
+When you're done, your branch should match `step-7-asyncio-orms`
 
-```py
-async def execute_query(query, params=None, insert=False):
-    async with create_engine().begin() as conn:
-        result = await conn.execute(text(query), params)
-        return [row._asdict() for row in result]
-```
-
-What does this mean?
-
-[`AsyncEngine.begin()`](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncEngine.begin) is a useful context manager which, on `__enter__()`, delivers an `AsyncConnection` with an `AsyncTransaction` established.
-This means that we need not explicitly call `conn.commit()` or `conn.close()` as the context manager takes care of that for us.
-All that's left to do then is to await the execution of the statement, and return the results in the desired format.
-
-For `execute_insert_query()`, update it to the following:
-
-```py
-async def execute_insert_query(query, params):
-    async with create_engine().begin() as conn:
-        await conn.execute(text(query), params)
-```
-
-Next, for the insert case, we now understand why this suffices.
-
-Finally, for `stream_query()`, we'll use [`AsyncConnection.stream()`](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncConnection.stream) which allows us to asyncronoushly loop over the results:
-
-```py
-async def stream_query(query, params=None, insert=False):
-    async with create_engine().begin() as conn:
-        result = await conn.stream(text(query), params)
-        async for row in result:
-            yield row._asdict()
-```
-
-Now that we've updated the query execution functions, we just need to update the SQL queries to use the syntax expected by SQLAlchemy.
-As we've done this already in step 3, go ahead and copy the correct SQL queries from your `sync` branch into this file.
-
-When you're done, your branch should match the results in `step-6-asyncio-sqlalchemy`.
+We are all done now!

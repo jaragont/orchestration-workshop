@@ -50,6 +50,7 @@ You'll notice that we've used `asyncpg`'s [`conn.cursor()`](https://magicstack.g
 We then yield one dictionary row at a time, which is what we end up sending as a json response.
 
 > ##### Test Your Understanding
+>
 > Why is `get_customers()` a regular method not an `async` one?
 {: .block-tip }
 
