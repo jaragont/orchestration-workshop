@@ -50,7 +50,6 @@ Note that SQLAlchemy will throw an exception if an implicit IO call is made.
 
 We elected to use `expire_on_commit=False` so we can access queried objects after a `session.commit()`
 
-
 > ##### WARNING
 > 
 > The AsyncSession object is a mutable, stateful object which represents a single, stateful database transaction in progress.
@@ -73,7 +72,7 @@ async def get_customers():
     async with async_session() as session:
 ```
 
-Using the session's context manager means we do not have to explicitly call session.close() when we are done. 
+Using the session's context manager means we do not have to explicitly call session.close() when we are done.
 
 Next, since we want to stream one customer object at a time rather query them all at once, we'll use the `stream_scalars()` API:
 
