@@ -1,5 +1,5 @@
 ---
-title: SQLAlchemy with asyncio
+title: SQLAlchemy ORMs with asyncio
 author: Aya Elsayed
 category: SQLAlchemy Workshop
 date: 2024-01-08
