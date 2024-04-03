@@ -2,22 +2,19 @@
 title: SQLAlchemy with asyncio
 author: Aya Elsayed
 category: SQLAlchemy Workshop
-date: 2024-01-05
+date: 2024-01-08
 layout: post
 ---
 
-In the last step, we learned about `asyncio`.
-Now let's see how we can use SQLAlchemy with an async service.
-To start, checkout the branch `step-6-asyncio-asyncpg`:
+Now that we've learned how to use SQLAlchemy with `asyncio`, it's time to bring back our ORMs.
+
+To start, checkout the branch `step-7-asyncio-orms`:
 
 ```sh
-git checkout step-6-asyncio-asyncpg
+git checkout step-7-asyncio-orms
 ```
 
-This is an async version of the service we say in `step-1-psychopg2`.
-Except it uses the the [`async` flavour of `Flask`](https://flask.palletsprojects.com/en/3.0.x/async-await/) and the [postgres async package `asyncpg`](https://magicstack.github.io/asyncpg/current/).
-
-Since we've installed new packages, let's add them to our `venv` so we can get intellisense for these packages.
+This essentially builds on the work we've done in `step-6-sqlalchemy` but also brings back the `db/` ORM files we've built in step 3.
 
 ```sh
 python -m pip install -r marketsvc/requirements.txt
