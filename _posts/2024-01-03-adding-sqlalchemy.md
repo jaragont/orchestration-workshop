@@ -9,6 +9,12 @@ layout: post
 In the last step, we had seen that `db_accessor.py` used `psycopg2`, the PostgreSQL database adapter, to interact with the database.
 In this section, we will introduce SQLAlchemy, whose core will act as an abstraction layer to connect with the PostgresSQL database.
 
+To start, checkout the branch `step-2-sqlalchemy`:
+
+```sh
+git checkout step-2-sqlalchemy
+```
+
 ## Engine
 
 Let's have a look at `db/base.py`.
@@ -35,7 +41,7 @@ We don't want to keep a `Connection` running indefinitely, and thus, the recomme
 
 ### Executing Queries
 
-Here, we see how we can execute queries with SQLAlchemy. For now, we'll be using raw SQL.
+Here, we see how we can execute queries with SQLAlchemy. For now, we'll be using raw SQL. Let's look at `db_accessor.py`.
 
 ```py
 def execute_query(query, params=None):
@@ -54,7 +60,7 @@ SELECT * FROM customer
 ROLLBACK
 ```
 
-The `Connection` is executed with the `conn.execute()` function, which returns a `Result` that represents an iterable object of resulting rows, depicted by `Row`.
+The statement is executed with the `Connection.execute()` function, which returns a `Result` that represents an iterable object of resulting rows, depicted by `Row`.
 
 As you can see from the logs, a **ROLLBACK** was emitted at the end. This marked the of the transaction. Try building and running the other queries yourself, and see the logs to understand what's happening behind the scenes.
 
@@ -102,8 +108,21 @@ COMMIT
 Notice there is a **COMMIT** without explicitly writing `conn.commit()`.
 
 
-If an exception is occured duing the transaction, the changes will be rolled back and a **ROLLBACK** will be displayed.
+If an exception is occured duing the transaction, the changes will be rolled back and a **ROLLBACK** will be displayed instead.
 
 
 ### Parameters
 
+We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called **bound parameters**. We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`, like `{"customer_id": 1}`. Have a look at the code in `add_new_order_for_customer()` function to see how we've used these bound paramters.
+
+> ##### NOTE
+> 
+> Never convert variables into the SQL string directly. **Always** use parameters. Not doing so can cause SQL injection attacks. Using parameters allows the dialect and DBAPI to correctly handle the input, and enables the driver to have the best performance. 
+>
+> When using ORMs and the SQLAlchemy Expression Language, literal values as automatically passed as bound parameters.
+{: .block-tip }
+
+If we want to send multiple sets of parameters, such as insert multiple records in the table, we can pass a list of dictionaries to `Connection.execute()` and send multiple parameter sets. The SQL statement will be executed once for each parameter set. Such example is shown in the `add_new_order_for_customer()` function in `db_accessor.py`.
+
+
+Now that we've added SQLAlchemy, let's eliminate raw SQL text and introduce ORMs!
