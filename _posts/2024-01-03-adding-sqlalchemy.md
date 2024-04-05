@@ -20,6 +20,6 @@ Here we create the `Engine` object, which is the entry point of any SQLAlchemy a
 
 We've also enabled the `echo` flag, which will log the generated SQL queries by SQLAlchemy.
 
-> **Lazy Initialization**
+> **Lazy Connecting**
 > 
-> When `create_engine()` first returns an `Engine` object, will not reach out to the database yet. It will connect the database the first time any task would be performed against the DB, such as a SELECT query. 
+> When `create_engine()` first returns an `Engine` object, it will not reach out to the database yet. It will wait for a task to be performed against the database, such as a SELECT query, and then connect to the database, following the [lazy initialization](https://en.wikipedia.org/wiki/Lazy_initialization) design pattern.
