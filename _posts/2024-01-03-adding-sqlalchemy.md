@@ -117,7 +117,7 @@ We might want to select specific rows, or insert some data to the table. The `Co
 
 > ##### NOTE
 > 
-> Never convert variables into the SQL string directly. **Always** use parameters. Not doing so can cause SQL injection attacks. Using parameters allows the dialect and DBAPI to correctly handle the input, and enables the driver to have the best performance. 
+> Never convert variables into the SQL string directly. **Always** use bound parameters. Not doing so can cause SQL injection attacks. Using parameters allows the dialect and DBAPI to correctly handle the input, and enables the driver to have the best performance. 
 >
 > When using ORMs and the SQLAlchemy Expression Language, literal values as automatically passed as bound parameters.
 {: .block-tip }
