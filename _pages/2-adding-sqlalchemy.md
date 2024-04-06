@@ -129,14 +129,7 @@ If an exception occurs duing the transaction, the changes will be rolled back an
 
 ### Parameters
 
-We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called **bound parameters**. We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`, like `{"customer_id": 1}`. Have a look at the code in `add_new_order_for_customer()` function to see how we've used these bound paramters.
-
-If we want to send multiple sets of parameters, such as insert multiple records in the table, we can pass a **list of dictionaries** to `Connection.execute()` and send multiple parameter sets. The SQL statement will be executed once for each parameter set.
-
-> ##### Test Your Understanding
->
-> Complete the `execute_insert_queries()` function to execute multiple insert queries. Can you predict the resulting SQLAlchemy logs when `add_new_order_for_customer()` is called?
-{: .block-tip }
+We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called [**bound parameters**](https://docs.sqlalchemy.org/en/20/glossary.html#term-bound-parameters). We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`, like `{"customer_id": 1}`. Have a look at the code in `add_new_order_for_customer()` function to see how we've used these bound paramters.
 
 > ##### WARNING
 > 
@@ -145,10 +138,20 @@ If we want to send multiple sets of parameters, such as insert multiple records 
 
 Now that we've added SQLAlchemy, let's eliminate raw SQL text and introduce ORMs!
 
+If we want to send multiple sets of parameters, such as insert multiple records in the table, we can pass a **list of dictionaries** to `Connection.execute()` and send multiple parameter sets. The SQL statement will be executed once for each parameter set.
+
+
+> ##### Test Your Understanding
+>
+> Complete the `execute_insert_queries()` function to execute multiple insert queries. Can you predict the resulting SQLAlchemy logs when `add_new_order_for_customer()` is called?
+{: .block-tip }
+
+
 > ##### Hint
 >
 > 🙌 You have now reached the `step-2-sqlalchemy` part of the tutorial. If not, check out that branch and continue from there:
 >```sh
 >git checkout step-2-sqlalchemy
 >```
+>
 {: .block-tip }
