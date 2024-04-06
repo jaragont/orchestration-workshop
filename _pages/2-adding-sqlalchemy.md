@@ -114,7 +114,7 @@ def execute_insert_query(query, params=None):
         return [row._asdict() for row in result]
 ```
 
-Let's update `add_new_order_for_customer()` to include bound parameters.
+Let's bind some parameters to the query in `add_new_order_for_customer()`.
 
 ```py
 def add_new_order_for_customer(customer_id, items):
