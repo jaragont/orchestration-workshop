@@ -9,21 +9,30 @@ layout: post
 In the last step, we had seen that `db_accessor.py` used `psycopg2`, the PostgreSQL database adapter, to interact with the database.
 In this section, we will introduce SQLAlchemy, whose core will act as an abstraction layer to connect with the PostgresSQL database.
 
-To start, checkout the branch `step-2-sqlalchemy`:
-
-```sh
-git checkout step-2-sqlalchemy
-```
-
 ## Engine
 
-Let's have a look at `db/base.py`.
+Let's create `db/base.py` to keep the database connection configuration in one place.
 
-Here we create the `Engine` object, which is the entry point of any SQLAlchemy application.  The `Engine` serves as the main source of DBAPI connections to a given database. We can create the `Engine` with the `create_engine()` method. Here, we have passed in a `URL` object to `create_engine()`, which includes all the necessary information required to connect to a database:
+Here we create the [`Engine`](https://docs.sqlalchemy.org/en/20/core/engines.html) object, which is the entry point of any SQLAlchemy application. The `Engine` serves as the main source of DBAPI connections to a given database. 
+
+```py
+url_object = URL.create(
+    "postgresql+psycopg2",
+    username=DB_USER,
+    password=DB_PASSWORD,
+    host=DB_HOST,
+    database=DB_NAME,
+    port=DB_PORT,
+)
+
+engine = create_engine(url_object, echo=True)
+```
+
+We create the `Engine` with the `create_engine()` method. Here, we have passed in a `URL` object to `create_engine()`, which includes all the necessary information required to connect to a database:
 - Type of database, represented by `postgresql`. 
-    - This instructs SQLAlchemy to use the PostgreSQL **dialect**, which is a system used to communicate with various kinds of databases and their respective drivers.
+    - This instructs SQLAlchemy to use the PostgreSQL [**dialect**](https://docs.sqlalchemy.org/en/20/glossary.html#term-dialect), which is a system used to communicate with various kinds of databases and their respective drivers.
 - DBAPI, represented by `psycopg2`.
-    - **DBAPI** (Python Database API Specification) is a driver that SQLAlchemy uses to connect to a database. It's a "low level" API that lets Python talk to the database.
+    - [**DBAPI**](https://docs.sqlalchemy.org/en/20/glossary.html#term-DBAPI) (Python Database API Specification) is a driver that SQLAlchemy uses to connect to a database. It's a "low level" API that lets Python talk to the database.
 - Database connection configuration like host, port, database, username, and password.
 
 We've also enabled the `echo` flag, which will log the generated SQL queries by SQLAlchemy. We'll display these logs to explain what happens behind the scenes.
@@ -35,15 +44,19 @@ We've also enabled the `echo` flag, which will log the generated SQL queries by 
 
 ## Connection
 
-Once our `Engine` object is ready, it will be used to connect to the database by providing a unit of connectivity called the `Connection`. It provides services to execute SQL statements and transaction control, and this is how we'll interact with the database. The `Connection` is acquired by `Engine.connect()`.
+Once our `Engine` object is ready, it will be used to connect to the database by providing a unit of connectivity called the [`Connection`](https://docs.sqlalchemy.org/en/20/core/connections.html).
 
-We don't want to keep a `Connection` running indefinitely, and thus, the recommended way to use `Connection` is with context managers, which will frame the operations inside into a transaction.
+`Connection` is a proxy object for an actual DBAPI connection, and provides services to execute SQL statements and transaction control, and this is how we'll interact with the database. The `Connection` is acquired by `Engine.connect()`.
+
+We don't want to keep a `Connection` running indefinitely, and thus, the recommended way to use `Connection` is with context managers, which will frame the operations inside into a transaction, and will invoke `Connection.close()` at the end of the block.
 
 ### Executing Queries
 
-Here, we see how we can execute queries with SQLAlchemy. For now, we'll be using raw SQL. Let's look at `db_accessor.py`.
+Here, we see how we can execute queries with SQLAlchemy. For now, we'll be using raw SQL. Let's update `execute_query()` in `db_accessor.py` to use the `Connection` using a context manager.
 
 ```py
+from db.base import engine
+
 def execute_query(query, params=None):
     with engine.connect() as conn:
         result = conn.execute(text(query), params)
@@ -70,7 +83,7 @@ Try building and running the other queries yourself, and see the logs to underst
 
 ### Committing Data
 
-You might have noticed the absense of the **COMMIT** statement from the SQLAlchemy logs. If we want to commit some data, we need to explicitly call `Connection.commit()` inside the block.
+You might have noticed the absense of the **COMMIT** statement from the SQLAlchemy logs. If we want to commit some data, we need to explicitly call `Connection.commit()` inside the block. Let's update the `execute_insert_query()` too.
 
 ```py
 def execute_insert_query(query, params=None):
@@ -92,11 +105,6 @@ COMMIT
 ```
 
 As you can see, `conn.commit()` committed the transaction, and the statement **COMMIT** is logged, as compared to **ROLLBACK** in the previous example. We can then call `conn.commit()` for committing additional statements. This style is called **commit as you go**. Additionally, notice how the parameter `customer_id` is passed into the SQL statement. We'll talk about this later.
-
-> ##### Test Your Understanding
->
-> Can you predict the resulting logs when `execute_insert_queries()` is called after this in the `add_new_order_for_customer()` function?
-{: .block-tip }
 
 Another way to commit data is to use the context manager `Engine.begin()` instead of `Engine.connect()`. It will declare the whole block to be one transcation block, and will enclose everything inside the transaction with one **COMMIT** at the end. This method is called **begin once**.
 
@@ -123,12 +131,24 @@ If an exception occurs duing the transaction, the changes will be rolled back an
 
 We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called **bound parameters**. We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`, like `{"customer_id": 1}`. Have a look at the code in `add_new_order_for_customer()` function to see how we've used these bound paramters.
 
+If we want to send multiple sets of parameters, such as insert multiple records in the table, we can pass a **list of dictionaries** to `Connection.execute()` and send multiple parameter sets. The SQL statement will be executed once for each parameter set.
+
+> ##### Test Your Understanding
+>
+> Complete the `execute_insert_queries()` function to execute multiple insert queries. Can you predict the resulting SQLAlchemy logs when `add_new_order_for_customer()` is called?
+{: .block-tip }
+
 > ##### WARNING
 > 
 > Never put variables directly in the query string. Doing so leaves your code vulnerable to SQL injection attacks. **Always** use parameter binding. Using parameters allows the dialect and DBAPI to correctly handle the input, and enables the driver to have the best performance.
 {: .block-danger }
 
-If we want to send multiple sets of parameters, such as insert multiple records in the table, we can pass a list of dictionaries to `Connection.execute()` and send multiple parameter sets. The SQL statement will be executed once for each parameter set. Such example is shown in the `add_new_order_for_customer()` function in `db_accessor.py`.
-
-
 Now that we've added SQLAlchemy, let's eliminate raw SQL text and introduce ORMs!
+
+> ##### Hint
+>
+> 🙌 You have now reached the `step-2-sqlalchemy` part of the tutorial. If not, check out that branch and continue from there:
+>```sh
+>git checkout step-2-sqlalchemy
+>```
+{: .block-tip }
