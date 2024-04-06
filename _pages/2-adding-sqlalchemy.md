@@ -62,11 +62,17 @@ def execute_query(query, params=None):
         result = conn.execute(text(query), params)
 
         return [row._asdict() for row in result]
-
-rows = execute_query("SELECT * FROM customer")
 ```
 
-SQLAlchemy logs:
+The `get_customers()` function will then call `execute_query()`.
+
+```py
+def get_customers():
+    rows = execute_query("SELECT * FROM customer")
+    return rows
+```
+
+#### SQLAlchemy logs:
 ```sql
 BEGIN (implicit)
 SELECT * FROM customer
@@ -83,7 +89,21 @@ Try building and running the other queries yourself, and see the logs to underst
 
 ### Committing Data
 
-You might have noticed the absense of the **COMMIT** statement from the SQLAlchemy logs. If we want to commit some data, we need to explicitly call `Connection.commit()` inside the block. Let's update the `execute_insert_query()` too.
+You might have noticed the absense of the **COMMIT** statement from the SQLAlchemy logs. If we want to commit some data, we need to explicitly call `Connection.commit()` inside the block.
+
+### Parameters
+
+We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called [**bound parameters**](https://docs.sqlalchemy.org/en/20/glossary.html#term-bound-parameters). We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`, like `{"customer_id": 1}`.
+
+> ##### WARNING
+> 
+> Never put variables directly in the query string. Doing so leaves your code vulnerable to SQL injection attacks. **Always** use parameter binding. Using parameters allows the dialect and DBAPI to correctly handle the input, and enables the driver to have the best performance.
+{: .block-danger }
+
+If we want to send multiple sets of parameters, such as insert multiple records in the table, we can pass a **list of dictionaries** to `Connection.execute()` and send multiple parameter sets. The SQL statement will be executed once for each parameter set.
+
+
+Let's update the `execute_insert_query()` to invoke `Connection.commit()`.
 
 ```py
 def execute_insert_query(query, params=None):
@@ -92,11 +112,31 @@ def execute_insert_query(query, params=None):
         conn.commit()
 
         return [row._asdict() for row in result]
-
-new_order_id = execute_insert_query("INSERT INTO orders...") # line 104
 ```
 
-SQLAlchemy logs:
+Let's update `add_new_order_for_customer()` to include bound parameters.
+
+```py
+def add_new_order_for_customer(customer_id, items):
+    try:
+        new_order_id = execute_insert_query(
+            """
+            INSERT INTO orders
+                (customer_id, order_time)
+            VALUES
+                (:customer_id, NOW())
+            RETURNING id
+            """,
+            {"customer_id": customer_id},
+        )[0]["id"]
+        
+        return True
+
+    except Exception:
+        return False
+```
+
+#### SQLAlchemy logs:
 ```sql
 BEGIN (implicit)
 INSERT INTO orders (customer_id, order_time) VALUES (%(customer_id)s, NOW()) RETURNING id
@@ -125,18 +165,6 @@ Notice there is a **COMMIT** without explicitly writing `conn.commit()`.
 
 
 If an exception occurs duing the transaction, the changes will be rolled back and a **ROLLBACK** will be displayed instead.
-
-
-### Parameters
-
-We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called [**bound parameters**](https://docs.sqlalchemy.org/en/20/glossary.html#term-bound-parameters). We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`, like `{"customer_id": 1}`. Have a look at the code in `add_new_order_for_customer()` function to see how we've used these bound paramters.
-
-> ##### WARNING
-> 
-> Never put variables directly in the query string. Doing so leaves your code vulnerable to SQL injection attacks. **Always** use parameter binding. Using parameters allows the dialect and DBAPI to correctly handle the input, and enables the driver to have the best performance.
-{: .block-danger }
-
-If we want to send multiple sets of parameters, such as insert multiple records in the table, we can pass a **list of dictionaries** to `Connection.execute()` and send multiple parameter sets. The SQL statement will be executed once for each parameter set.
 
 
 > ##### Test Your Understanding
