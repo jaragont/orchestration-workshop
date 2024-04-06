@@ -31,12 +31,12 @@ How can we use coroutines to execute these jobs concurrently?
 
 Coroutines in Python are methods that allow _cooperative multi-tasking_; a type of multi-tasking where the coroutines voluntarily yield control to other coroutines.
 Contrast this with preemptive multitasking, where a scheduler context-switches between different tasks or threads of execution involuntarily.
-Coroutines can be entered, exited and resumed at many different but deterministic points [[1]](https://docs.python.org/3/glossary.html#term-coroutine).
+Coroutines can be entered, exited and resumed at many different but deterministic points [^1].
 
-Coroutines can be defined using the keyword `async def`, and may contain synchronisation keywords like `await` and `yield` [[1]](https://docs.python.org/3/glossary.html#term-coroutine).
+Coroutines can be defined using the keyword `async def`, and may contain synchronisation keywords like `await` and `yield` [^1].
 
 `asyncio` is a popular library for writing concurrent IO-bound code using the `async`/`await` syntax.
-It allows you to schedule and run Python coroutines concurrently on an event loop, perform network IO, distribute tasks via queues and synchronise concurrent code [[2]](https://docs.python.org/3/library/asyncio.html).
+It allows you to schedule and run Python coroutines concurrently on an event loop, perform network IO, distribute tasks via queues and synchronise concurrent code [^2].
 
 - `await <awaitable>`: tells a coroutine to yield control while it awaits for the `<awaitable>`, like another coroutine, to finish executing
 - `async def`: defines a coroutine function
@@ -89,7 +89,7 @@ To understand better how `Tasks` are scheduled and run on the event loop, we mod
 
 > ##### TIP
 > 
-> In `asyncio` terminology, a [Task](https://docs.python.org/3/library/asyncio-task.html#asyncio.Task) is a future-like object that runs a coroutine on an event loop [[3]](https://docs.python.org/3/library/asyncio-task.html#asyncio.Task).
+> In `asyncio` terminology, a [Task](https://docs.python.org/3/library/asyncio-task.html#asyncio.Task) is a future-like object that runs a coroutine on an event loop [^3].
 {: .block-tip }
 
 To do this, we use the `asyncio.create_task()` which creates a `Task` and schedules its execution.
@@ -183,7 +183,7 @@ It has achieved concurrency by scheduling all the tasks passed to it first, befo
 ## Task Groups
 
 Now that we understand how scheduling works, we can look at another useful alternative for scheduling and running tasks concurrently introduced in `Python3.11`, known as `asyncio.TaskGroup`.
-It provides stronger safety guarantees than `gather()` for scheduling a nesting of subtasks by cancelling the remaining scheduled tasks if one task raises an exception [[4]](https://docs.python.org/3/library/asyncio-task.html#asyncio.gather).
+It provides stronger safety guarantees than `gather()` for scheduling a nesting of subtasks by cancelling the remaining scheduled tasks if one task raises an exception [^4].
 
 Let's look at how it's used.
 Open `04-task_groups.py`.
@@ -191,7 +191,7 @@ Open `04-task_groups.py`.
 We have updated our `main()` coroutine to create a `TaskGroup` using an `async with` (async context manager).
 We've named it `tg` and scheduled our tasks on it, instead of using `asyncio.create_task()` with no particular group association.
 
-Note that here, the `await` is implicit when the context manager exists [[5]](https://docs.python.org/3/library/asyncio-task.html#asyncio.TaskGroup).
+Note that here, the `await` is implicit when the context manager exists [^5].
 
 Run the file and play around with the delay values:
 
@@ -205,7 +205,7 @@ Open the file `05-async_for.py`.
 This file introduces new syntax `async for`. How does it work?
 
 It is used to loop over an `asynchronous iterable`.
-An `asynchronous iterator` is an object that implements `__aiter__()` and `__anext__()`, the asynchronous counterparts to `__iter__()` and `__next__()` [[6]](https://docs.python.org/3/glossary.html#term-asynchronous-iterator).
+An `asynchronous iterator` is an object that implements `__aiter__()` and `__anext__()`, the asynchronous counterparts to `__iter__()` and `__next__()` [^6].
 
 Go ahead and run the file:
 
@@ -252,9 +252,9 @@ This raises the `asyncio.exceptions.CancelledError` exception, which we have cho
 
 ## References
 
-1. [https://docs.python.org/3/glossary.html#term-coroutine](https://docs.python.org/3/glossary.html#term-coroutine)
-2. [https://docs.python.org/3/library/asyncio.html](https://docs.python.org/3/library/asyncio.html)
-3. [https://docs.python.org/3/library/asyncio-task.html#asyncio.Task](https://docs.python.org/3/library/asyncio-task.html#asyncio.Task)
-4. [https://docs.python.org/3/library/asyncio-task.html#asyncio.gather](https://docs.python.org/3/library/asyncio-task.html#asyncio.gather)
-5. [https://docs.python.org/3/library/asyncio-task.html#asyncio.TaskGroup](https://docs.python.org/3/library/asyncio-task.html#asyncio.TaskGroup)
-6. [https://docs.python.org/3/glossary.html#term-asynchronous-iterator](https://docs.python.org/3/glossary.html#term-asynchronous-iterator)
+[^1]: [https://docs.python.org/3/glossary.html#term-coroutine](https://docs.python.org/3/glossary.html#term-coroutine)
+[^2]: [https://docs.python.org/3/library/asyncio.html](https://docs.python.org/3/library/asyncio.html)
+[^3]: [https://docs.python.org/3/library/asyncio-task.html#asyncio.Task](https://docs.python.org/3/library/asyncio-task.html#asyncio.Task)
+[^4]: [https://docs.python.org/3/library/asyncio-task.html#asyncio.gather](https://docs.python.org/3/library/asyncio-task.html#asyncio.gather)
+[^5]: [https://docs.python.org/3/library/asyncio-task.html#asyncio.TaskGroup](https://docs.python.org/3/library/asyncio-task.html#asyncio.TaskGroup)
+[^6]: [https://docs.python.org/3/glossary.html#term-asynchronous-iterator](https://docs.python.org/3/glossary.html#term-asynchronous-iterator)
