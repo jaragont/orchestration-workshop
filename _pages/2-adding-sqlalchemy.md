@@ -176,7 +176,7 @@ Now that we've added SQLAlchemy, let's eliminate raw SQL text and introduce ORMs
 
 > ##### Kudos!
 >
-> 🙌 You have now reached the `step-2-sqlalchemy` part of the tutorial. If not, check out that branch and continue from there:
+> 🙌 You have now reached the `step-2-sqlalchemy` part of the tutorial. If not, checkout that branch and continue from there:
 >```sh
 >git checkout step-2-sqlalchemy
 >```
