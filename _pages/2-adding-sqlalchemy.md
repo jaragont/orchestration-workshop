@@ -174,7 +174,7 @@ If an exception occurs duing the transaction, the changes will be rolled back an
 
 Now that we've added SQLAlchemy, let's eliminate raw SQL text and introduce ORMs!
 
-> ##### Hint
+> ##### Kudos
 >
 > 🙌 You have now reached the `step-2-sqlalchemy` part of the tutorial. If not, check out that branch and continue from there:
 >```sh
