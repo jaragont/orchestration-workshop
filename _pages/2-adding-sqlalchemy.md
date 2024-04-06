@@ -91,7 +91,7 @@ Try building and running the other queries yourself, and see the logs to underst
 
 You might have noticed the absense of the **COMMIT** statement from the SQLAlchemy logs. If we want to commit some data, we need to explicitly call `Connection.commit()` inside the block.
 
-### Parameters
+### Parameter Binding
 
 We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called [**bound parameters**](https://docs.sqlalchemy.org/en/20/glossary.html#term-bound-parameters). We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`, like `{"customer_id": 1}`.
 
@@ -174,7 +174,7 @@ If an exception occurs duing the transaction, the changes will be rolled back an
 
 Now that we've added SQLAlchemy, let's eliminate raw SQL text and introduce ORMs!
 
-> ##### Kudos
+> ##### Kudos!
 >
 > 🙌 You have now reached the `step-2-sqlalchemy` part of the tutorial. If not, check out that branch and continue from there:
 >```sh
