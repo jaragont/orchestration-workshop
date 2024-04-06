@@ -1,6 +1,6 @@
 ---
 title: Environment Setup
-author: Aya Elsayed
+author: Aya Elsayed, Rhythm Patel
 category: SQLAlchemy Workshop
 date: 2024-01-01
 layout: post

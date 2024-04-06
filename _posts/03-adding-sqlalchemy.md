@@ -1,6 +1,6 @@
 ---
 title: Adding SQLAlchemy
-author: Aya Elsayed
+author: Aya Elsayed, Rhythm Patel
 category: SQLAlchemy Workshop
 date: 2024-01-03
 layout: post

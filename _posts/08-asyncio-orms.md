@@ -1,6 +1,6 @@
 ---
 title: SQLAlchemy ORMs with asyncio
-author: Aya Elsayed
+author: Aya Elsayed, Rhythm Patel
 category: SQLAlchemy Workshop
 date: 2024-01-08
 layout: post

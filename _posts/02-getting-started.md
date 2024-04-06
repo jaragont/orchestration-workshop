@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-author: Aya Elsayed
+author: Aya Elsayed, Rhythm Patel
 category: SQLAlchemy Workshop
 date: 2024-01-02
 layout: post

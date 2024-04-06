@@ -1,6 +1,6 @@
 ---
 title: SQLAlchemy with asyncio
-author: Aya Elsayed
+author: Aya Elsayed, Rhythm Patel
 category: SQLAlchemy Workshop
 date: 2024-01-07
 layout: post

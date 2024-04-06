@@ -1,6 +1,6 @@
 ---
 title: Asyncio Introduction
-author: Aya Elsayed
+author: Aya Elsayed, Rhythm Patel
 category: SQLAlchemy Workshop
 date: 2024-01-06
 layout: post

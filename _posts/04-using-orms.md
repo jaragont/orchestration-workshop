@@ -1,8 +1,8 @@
 ---
-title: Optimisation Techniques
-author: Aya Elsayed
+title: Using ORMs
+author: Aya Elsayed, Rhythm Patel
 category: SQLAlchemy Workshop
-date: 2024-01-05
+date: 2024-01-04
 layout: post
 ---
 
