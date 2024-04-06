@@ -136,8 +136,6 @@ We might want to select specific rows, or insert some data to the table. The `Co
 > Never put variables directly in the query string. Doing so leaves your code vulnerable to SQL injection attacks. **Always** use parameter binding. Using parameters allows the dialect and DBAPI to correctly handle the input, and enables the driver to have the best performance.
 {: .block-danger }
 
-Now that we've added SQLAlchemy, let's eliminate raw SQL text and introduce ORMs!
-
 If we want to send multiple sets of parameters, such as insert multiple records in the table, we can pass a **list of dictionaries** to `Connection.execute()` and send multiple parameter sets. The SQL statement will be executed once for each parameter set.
 
 
@@ -146,6 +144,7 @@ If we want to send multiple sets of parameters, such as insert multiple records 
 > Complete the `execute_insert_queries()` function to execute multiple insert queries. Can you predict the resulting SQLAlchemy logs when `add_new_order_for_customer()` is called?
 {: .block-tip }
 
+Now that we've added SQLAlchemy, let's eliminate raw SQL text and introduce ORMs!
 
 > ##### Hint
 >
@@ -153,5 +152,4 @@ If we want to send multiple sets of parameters, such as insert multiple records 
 >```sh
 >git checkout step-2-sqlalchemy
 >```
->
 {: .block-tip }
