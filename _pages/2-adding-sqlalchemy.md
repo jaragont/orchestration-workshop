@@ -72,7 +72,7 @@ def get_customers():
     return rows
 ```
 
-#### SQLAlchemy logs:
+##### SQLAlchemy logs:
 ```sql
 BEGIN (implicit)
 SELECT * FROM customer
@@ -136,7 +136,7 @@ def add_new_order_for_customer(customer_id, items):
         return False
 ```
 
-#### SQLAlchemy logs:
+##### SQLAlchemy logs:
 ```sql
 BEGIN (implicit)
 INSERT INTO orders (customer_id, order_time) VALUES (%(customer_id)s, NOW()) RETURNING id
@@ -153,7 +153,7 @@ with engine.begin() as conn:
     result = conn.execute(text("ISERT INTO orders..."), params)
 ```
 
-SQLAlchemy logs:
+##### SQLAlchemy logs:
 ```sql
 BEGIN (implicit)
 INSERT INTO orders ...
