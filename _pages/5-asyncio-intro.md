@@ -33,6 +33,10 @@ Coroutines in Python are methods that allow _cooperative multi-tasking_; a type 
 Contrast this with preemptive multitasking, where a scheduler context-switches between different tasks or threads of execution involuntarily.
 Coroutines can be entered, exited and resumed at many different but deterministic points [^1].
 
+We can visualise the difference between cooperative multi-tasking and preemptive multitasking using this diagram:
+
+![concurrency](../assets/concurrency_parallelism.png)
+
 Coroutines can be defined using the keyword `async def`, and may contain synchronisation keywords like `await` and `yield` [^1].
 
 `asyncio` is a popular library for writing concurrent IO-bound code using the `async`/`await` syntax.
@@ -40,6 +44,13 @@ It allows you to schedule and run Python coroutines concurrently on an event loo
 
 - `await <awaitable>`: tells a coroutine to yield control while it awaits for the `<awaitable>`, like another coroutine, to finish executing
 - `async def`: defines a coroutine function
+
+On a high level, `asyncio` implements cooperative multitasking by scheduling coroutines on an event loop.
+
+For our understanding, we are model an event loop using a priority queue (left to right).
+At a given moment, `asyncio` will run the first `READY` task on the queue:
+
+![event loop](../assets/tasks_queue.png)
 
 ## Using Coroutines
 
@@ -66,6 +77,10 @@ python 02-async_tests.py
 
 As you can see, the coroutines executed sequentially. And the tasks took 3s in total.
 Why is that?
+
+Let's take a look at the order of events:
+
+![gif](../assets/02-async_tasks.gif)
 
 On L12, we schedule and run `worker(1, "order milk")`, let's call it `task1`.
 Because of the `await` on L14, the `main()` coroutine is paused there and yields control until `task1` is done executing.
@@ -106,68 +121,29 @@ python 03-scheduling_tasks.py
 How does this happen?
 Here is a list of steps, showing the pseudo-state of the event-loop after each step.
 
+![gif](../assets/03-scheduling_tasks.gif)
+
 T0: task1 scheduled, task2 scheduled, `main()` yields control at L23.
 Event loop:
-
-```txt
-main: start          -- done
-task 1: start        -- ready
-task 2: start        -- ready
-main: await task1.   -- busy
-```
 
 T1: task1 prints its start time, yields control as it awaits the sleep on L9.
 Event loop:
 
-```txt
-task 1: start        -- done
-task 2: start.       -- ready
-main: await task1    -- busy
-task 1: await sleep  -- busy
-```
-
 T2: task2 prints its start time, yields control as it awaits the sleep on L9.
 Event loop:
-
-```txt
-task 2: start.       -- done
-main: await task1    -- busy
-task 1: await sleep  -- ready
-task 2: await sleep  -- busy
-```
 
 T3: the next ready task is task1, it prints its end time and terminates, which makes main ready.
 Event loop:
 
-```txt
-main: await task1    -- ready
-task 1: await sleep  -- done
-task 2: await sleep  -- busy
-```
-
 T4: the next ready task is main, its execution advances to the next await on L24.
 Event loop:
-
-```txt
-main: await task1    -- done
-task 2: await sleep  -- ready
-main: await task2    -- busy
-```
 
 T5: task2 prints its end time and terminates, which makes main ready.
 Event loop:
 
-```txt
-task 2: await sleep  -- done
-main: await task2    -- ready
-```
-
 T6: finally, main resumes and terminates, the event loop is now empty.
 execution resumes at L24 and the program terminates.
 
-```txt
-main: await task2    -- done
-```
 
 > ##### Test Your Understanding
 >
