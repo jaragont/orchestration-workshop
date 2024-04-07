@@ -296,11 +296,6 @@ COMMIT
 
 The first **SELECT** statement is to fetch the existing customer with the given `customer_id`. The first **INSERT** statement inserts data into the `orders` table and returns the generated `id` of the new inserted order. The second **INSERT** statement inserts multiple records to the `order_items` table using the same `id`. Notice how SQLAlchemy is using bound parameters for all the statements. Finally, we have a **COMMIT** to depict the data has been successfully comitted to the database.
 
-> ##### Test Your Understanding
->
-> Why have we used `Session.flush()` along with `Session.commit()`? What would happen if we had used `Session.commit()` twice, instead of `Session.flush()`?
-{: .block-tip }
-
 
 We have not only introduced ORMs that represent tables with classes, but also removed raw SQL text and made querying and inserting data much easier. Let's look at some optimizations and make our codebase even better!
 
