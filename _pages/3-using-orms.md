@@ -30,6 +30,8 @@ The foundational unit of SQL when using the ORM is the Mapped Class. As we disco
 
 With this in mind, let's create a mapped class for `Customer` in `db/customer.py`.
 
+##### db/customer.py
+
 ```py
 from db.base import Base
 from sqlalchemy.orm import Mapped, mapped_column
@@ -73,7 +75,7 @@ Amazing! You've now created the `Address` ORM mapped class as well. As you might
 
 This is how `Address` will look like.
 
-##### Address
+##### db/address.py
 
 ```py
 from db.base import Base
@@ -98,7 +100,7 @@ class Address(Base):
 
 Let's also update the `Customer` class.
 
-##### Customer
+##### db/customer.py
 
 ```py
 from db.address import Address
@@ -136,7 +138,9 @@ We have applied a non-collection type to the `Mapped` annotation on both sides o
 
 To represent our ORM class as a comprehensible response from our service, let's introduce an `as_dict()` method in `Customer`. This converts the ORM class into a dictionary with a meaningful structure.
 
-Finally, our `Customer` mapped class should look like this:
+Finally, our `Customer` mapped class should look something like this.
+
+##### db/customer.py
 
 ```py
 from db.address import Address
