@@ -122,7 +122,9 @@ We can depict the foreign key constraint by using the [`ForeignKey`](https://doc
 
 In addition to the column-based attributes, we have a [`relationship()`](https://docs.sqlalchemy.org/en/20/orm/relationship_api.html#sqlalchemy.orm.relationship) construct that represents a linkage between two mapped classes, and by extension, relationship between two tables.
 
-In our case, the `relationship()` construct, along with the `Mapped["Address"]` construct, will be used to examine the table relationships. As a result, `Customer.address` links `customer` to `address`, and `Address.customer` links `address` to `customer`. We'll talk about its parameters in a bit. The relationship linkage between the two tables is inferred with the foreign key constraint we had defined previously.
+In our case, the `relationship()` construct, along with the `Mapped["Address"]` construct, will be used to examine the table relationships. As a result, `Customer.address` links `customer` to `address`, and `Address.customer` links `address` to `customer`. The relationship linkage between the two tables is inferred with the foreign key constraint we had defined previously. 
+
+The `lazy="joined"` parameter signifies that we've used joined relationship loading technique, a type of eager loading. We will talk about this in the next section in detail.
 
 We have applied a non-collection type to the `Mapped` annotation on both sides of the relationship, i.e. `Mapped["Address"]` in `Customer`, and `Mapped["Customer"]` in `Address`. With this, SQLAlchemy has determined that there is a **One to One** relationship.
 
@@ -199,7 +201,7 @@ def get_customers():
         result = session.execute(stmt)
         customers = result.scalars().all()
 
-        return [customer.as_dict() for customer in customers]
+        return customers
 ```
 
 When using ORMs, the `Engine` is managed by the [`Session`](https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session) object. The `Session` is the fundamental transactional and database interactive object for ORMs. It is almost identical to the `Connection` discussed in the previous section. In fact, `Session` refers to `Connection` internally to emit SQL. Similarly, the session uses "commit as you go" behaviour. 
@@ -207,3 +209,9 @@ When using ORMs, the `Engine` is managed by the [`Session`](https://docs.sqlalch
 The [`select()`](https://docs.sqlalchemy.org/en/20/core/selectable.html#sqlalchemy.sql.expression.select) construct generates a [`Select`](https://docs.sqlalchemy.org/en/20/core/selectable.html#sqlalchemy.sql.expression.Select) object that is used for **SELECT** queries. The `select()` function accepts mapped classes as well as class-level attributes that represent mapped columns. In our case, we're passing in the `Customer` mapped class to `select()`.
 
 The resulting `Select` object, `stmt` in our case, is passed to [`Session.execute()`](https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session.execute), which returns a [`Result`](https://docs.sqlalchemy.org/en/20/core/connections.html#sqlalchemy.engine.Result) object. To get a list of `Customer` rather than a list of `Row`, we call [`scalars()`](https://docs.sqlalchemy.org/en/20/core/connections.html#sqlalchemy.engine.Result.scalars) on the `Result`. Since we want to return all the customers, we further call `all()`.
+
+The following will be the value of `customers`. Notice how also have address of a customer, even though our query was `select(Customer)`. This is due the relationship we had defined between the two classes.
+
+```py
+[Customer(id=1, name='Alex', address_id=1, address=Address(id=1, flat_number=101, post_code=10001)), ...]
+```

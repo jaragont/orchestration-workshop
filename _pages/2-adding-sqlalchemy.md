@@ -61,7 +61,7 @@ def execute_query(query, params=None):
     with engine.connect() as conn:
         result = conn.execute(text(query), params)
 
-        return [row._asdict() for row in result]
+        return result
 ```
 
 The `get_customers()` function will then call `execute_query()`.
@@ -111,7 +111,7 @@ def execute_insert_query(query, params=None):
         result = conn.execute(text(query), params)
         conn.commit()
 
-        return [row._asdict() for row in result]
+        return next(row._asdict() for row in result)["id"]
 ```
 
 Let's bind some parameters to the query in `add_new_order_for_customer()`.
@@ -128,7 +128,7 @@ def add_new_order_for_customer(customer_id, items):
             RETURNING id
             """,
             {"customer_id": customer_id},
-        )[0]["id"]
+        )
         
         return True
 
