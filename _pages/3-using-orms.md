@@ -173,9 +173,37 @@ class Customer(Base):
         }
 ```
 
-
 > ##### TIP
 >
 > There's a useful SQLAlchemy extension [`Automap`](https://docs.sqlalchemy.org/en/20/orm/extensions/automap.html#) that automatically generates mapped classes for you.
 > You can also use a mix of programmatic and auto-generated classes.
 {: .block-tip }
+
+
+## Querying Data
+
+We now have our `Customer` and `Address` ORMs set up. Querying data now becomes like magic! We eliminate the need of raw SQL statements and utilize the SQL Expression Language, which is extremely intuitive and almost readable in English.
+
+Let's update the `get_customers()` function in `db/accessor.py`.
+
+```py
+from db.base import engine
+from db.customer import Customer
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+
+def get_customers():
+    with Session(engine) as session:
+        stmt = select(Customer)
+        result = session.execute(stmt)
+        customers = result.scalars().all()
+
+        return [customer.as_dict() for customer in customers]
+```
+
+When using ORMs, the `Engine` is managed by the [`Session`](https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session) object. The `Session` is the fundamental transactional and database interactive object for ORMs. It is almost identical to the `Connection` discussed in the previous section. In fact, `Session` refers to `Connection` internally to emit SQL. Similarly, the session uses "commit as you go" behaviour. 
+
+The [`select()`](https://docs.sqlalchemy.org/en/20/core/selectable.html#sqlalchemy.sql.expression.select) construct generates a [`Select`](https://docs.sqlalchemy.org/en/20/core/selectable.html#sqlalchemy.sql.expression.Select) object that is used for **SELECT** queries. The `select()` function accepts mapped classes as well as class-level attributes that represent mapped columns. In our case, we're passing in the `Customer` mapped class to `select()`.
+
+The resulting `Select` object, `stmt` in our case, is passed to [`Session.execute()`](https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session.execute), which returns a [`Result`](https://docs.sqlalchemy.org/en/20/core/connections.html#sqlalchemy.engine.Result) object. To get a list of `Customer` rather than a list of `Row`, we call [`scalars()`](https://docs.sqlalchemy.org/en/20/core/connections.html#sqlalchemy.engine.Result.scalars) on the `Result`. Since we want to return all the customers, we further call `all()`.
