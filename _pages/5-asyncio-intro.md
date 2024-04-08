@@ -35,7 +35,7 @@ Coroutines can be entered, exited and resumed at many different but deterministi
 
 We can visualise the difference between cooperative multi-tasking and preemptive multitasking using this diagram:
 
-![concurrency](/assets/gitbook/images/concurrency_parallelism.png)
+![concurrency](/sqlalchemy-wkshop/assets/gitbook/images/concurrency_parallelism.png)
 
 Coroutines can be defined using the keyword `async def`, and may contain synchronisation keywords like `await` and `yield` [^1].
 
@@ -50,7 +50,7 @@ On a high level, `asyncio` implements cooperative multitasking by scheduling cor
 For our understanding, we are model an event loop using a priority queue (left to right).
 At a given moment, `asyncio` will run the first `READY` task on the queue:
 
-![event loop](/assets/gitbook/images/tasks_queue.png)
+![event loop](/sqlalchemy-wkshop/assets/gitbook/images/tasks_queue.png)
 
 ## Using Coroutines
 
@@ -80,7 +80,7 @@ Why is that?
 
 Let's take a look at the order of events:
 
-![gif](/assets/gitbook/images/02-async_tasks.gif)
+![gif](/sqlalchemy-wkshop/assets/gitbook/images/02-async_tasks.gif)
 
 On L12, we schedule and run `worker(1, "order milk")`, let's call it `task1`.
 Because of the `await` on L14, the `main()` coroutine is paused there and yields control until `task1` is done executing.
@@ -121,7 +121,7 @@ python 03-scheduling_tasks.py
 How does this happen?
 Here is a list of steps, showing the pseudo-state of the event-loop after each step.
 
-![gif](/assets/gitbook/images/03-scheduling_tasks.gif)
+![gif](/sqlalchemy-wkshop/assets/gitbook/images/03-scheduling_tasks.gif)
 
 T0: task1 scheduled, task2 scheduled, `main()` yields control at L23.
 Event loop:
