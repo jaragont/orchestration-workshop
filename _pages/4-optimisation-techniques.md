@@ -127,3 +127,117 @@ No loading means to disable loading on a relationship. The child object is empty
 {: .block-tip }
 
 
+## SQL Functions
+
+You can also use SQL functions including aggregate functions while working with ORMs. We can create [`Function`](https://docs.sqlalchemy.org/en/20/core/functions.html#sqlalchemy.sql.functions.Function) objects by using the [`func`](https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.func) object, which acts as a factory.
+
+Let's use the `SUM()` function to get the total cost of an order in the SQL query itself, rather than us doing it in Python. 
+
+```py
+from sqlalchemy.sql import func
+
+def get_total_cost_of_an_order(order_id):
+    with Session(engine) as session:
+        result = session.execute(
+            select(func.sum(Item.price * OrderItems.quantity))
+            .join(Orders.order_items)
+            .join(OrderItems.item)
+            .where(Orders.id == order_id)
+        )
+        total_cost = result.scalar()
+
+        return total_cost
+```
+
+##### SQLAlchemy logs
+
+```sql
+BEGIN (implicit)
+SELECT sum(item.price * order_items.quantity) AS sum_1 
+FROM orders JOIN order_items ON orders.id = order_items.order_id JOIN item ON item.id = order_items.item_id 
+WHERE orders.id = %(id_1)s
+[generated in 0.00016s] {'id_1': '1'}
+ROLLBACK
+```
+
+Here, we're directly using the `SUM()` aggregate function and returning a single value from our SQL query. Similarly, we can use any SQL functions while using ORMs depending on our use case.
+
+## Hybrid Attributes
+
+[Hybrid attributes](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html) have different behaviours at class and instance level, hence the name "hybrid". This is best explained with an example.
+
+Let us consider the `order_items` table. The `quantity` of an order is defined here and the `price` of an item is defined in the `items` table. Whenever we want to get the total cost of an item, we have to multiply item price and quantity for each item in the order. 
+
+Alternatively, we could introduce a hybrid property that represents the total cost of an item. We can do this with the [`@hybrid_property`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property) decorator.
+
+##### db/order_items.py
+
+```py
+from sqlalchemy.ext.hybrid import hybrid_property
+
+class OrderItems(Base):
+    ...
+
+    @hybrid_property
+    def item_total(self):
+        return self.item.price * self.quantity
+
+    @item_total.expression
+    @classmethod
+    def item_total(cls):
+        return Item.price * cls.quantity
+```
+
+Here, the `item_total` property returns the product of item's price and the quantity of that item bought. On instances of `OrderItems`, the multiplication occurs in Python.
+
+Thus, in `as_dict()` method of `Orders`, where we return the information of an order, we can directly get the item's total by `order_item.item_total`. This makes it much easier to access the item total.
+
+```py
+def as_dict(self):
+    return {
+        ...
+        "items": [
+            {
+                ...
+                "total": order_item.item_total,
+            }
+            for order_item in self.order_items
+        ],
+    }
+```
+
+To use hybrid attributes in the SQL query, we need to use the [`hybrid_property.expression()`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property.expression) modifier. This is because its SQL expression must be differentiated from the Python expression.
+
+Above, we have also added an expression modifier to the `item_total` hybrid property. Notice how this function is a class method and operates on the `OrderItems` and `Item` classes, similar to how we might do in the `select()` query.
+
+Writing `@classmethod` here is optional. It is used for type hinting to indicate `cls` is supposed to be the `OrderItems` class, and not its instance.
+
+Consequently, our query to get the total cost of an order becomes even simpler. Here, we have directly accessed the hybrid expression in the query.
+
+```py
+def get_total_cost_of_an_order(order_id):
+    with Session(engine) as session:
+        result = session.execute(
+            select(func.sum(OrderItems.item_total))
+            .join(Orders.order_items)
+            .join(OrderItems.item)
+            .where(Orders.id == order_id)
+        )
+        total_cost = result.scalar()
+
+        return total_cost
+```
+
+You might notice hybrid properties are similar to Python's `@property` decorator. We can also define [setters](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property.setter) on hybrid properties but it doesn't make sense to 'set' the item total in our case.
+
+We now have explored some ways how we can optimise our code using ORMs. There are many more techniques that would be hard to cover in a short span of time. Feel free to browse the SQLAlchemy [documentation](https://docs.sqlalchemy.org/en/20/index.html) to find ways to make your life easier! 
+
+Having said that, let's switch gears and look at asyncio, and how we can utilise it in our service.
+
+> ##### Kudos!
+>
+> 🙌 You have now reached the `step-4-optimisatinos` part of the tutorial. If not, checkout that branch and continue from there:
+>```sh
+>git checkout step-4-optimisations
+>```
+{: .block-tip }
