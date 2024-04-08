@@ -84,8 +84,10 @@ The statement is executed with the `Connection.execute()` function, which return
 
 As you can see from the logs, a **ROLLBACK** was emitted at the end. This marked the of the transaction. An automatic rollback occurs when a connection is closed after use, to ensure that the connection is 'clean' for its next use.
 
-Try building and running the other queries yourself, and see the logs to understand what's happening behind the scenes.
-
+> ##### Test Your Understanding
+>
+> Try building and running the other queries yourself, and see the logs to understand what's happening behind the scenes.
+{: .block-tip }
 
 ### Committing Data
 
@@ -172,6 +174,8 @@ If an exception occurs duing the transaction, the changes will be rolled back an
 > Complete the `execute_insert_queries()` function to execute multiple insert queries. Can you predict the resulting SQLAlchemy logs when `add_new_order_for_customer()` is called?
 {: .block-tip }
 
+&nbsp;
+
 Now that we've added SQLAlchemy, let's eliminate raw SQL text and introduce ORMs!
 
 > ##### Kudos!
@@ -181,3 +185,5 @@ Now that we've added SQLAlchemy, let's eliminate raw SQL text and introduce ORMs
 >git checkout step-2-sqlalchemy
 >```
 {: .block-tip }
+
+&nbsp;

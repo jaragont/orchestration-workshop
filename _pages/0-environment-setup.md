@@ -71,3 +71,5 @@ If you haven't done so already, please do that now.
 
 3. A prompt by the `Python` extension will pop up, asking if you'd like to use the new `./venv/bin/Python` as your current `Python` interpreter.
 If not prompted, you can do this manually by clicking on the Python path in the bottom right corner of your `Codespaces` screen, and choosing `./venv/bin/python` for your interpreter.
+
+&nbsp;

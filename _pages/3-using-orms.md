@@ -271,7 +271,7 @@ def add_new_order_for_customer(customer_id, items):
 
 Here, we've first fetched the `Customer` object with the given `customer_id` by using [`Select.where()`](https://docs.sqlalchemy.org/en/20/core/selectable.html#sqlalchemy.sql.expression.Select.where). We then create a new object of `Orders` class. 
 
-Adding `OrderItems` becomes quite effortless now. We can just assign a list of `OrderItems` objects to the `Order.order_items` class attribute. Doing so is straightforward because of the relationship between the two classes, whose type annotation is `Mapped[list["OrderItems"]]`. We can call `Session.add(`new_order`)` to add our instance to the `Session`.
+Adding `OrderItems` becomes quite effortless now. We can just assign a list of `OrderItems` objects to the `Order.order_items` class attribute. Doing so is straightforward because of the relationship between the two classes, whose type annotation is `Mapped[list["OrderItems"]]`. We can call `Session.add(new_order)` to add our instance to the `Session`.
 
 After we call `session.add(new_order)`, the object is still in pending state and has not been inserted yet. The transaction still remanins open until we call [`Session.commit()`](https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session.commit), or when the context manager automatically calls [`Session.rollback()`](https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session.rollback) and/or [`Session.close()`](https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session.close).
 
@@ -296,6 +296,7 @@ COMMIT
 
 The first **SELECT** statement is to fetch the existing customer with the given `customer_id`. The first **INSERT** statement inserts data into the `orders` table and returns the generated `id` of the new inserted order. The second **INSERT** statement inserts multiple records to the `order_items` table using the same `id`. Notice how SQLAlchemy is using bound parameters for all the statements. Finally, we have a **COMMIT** to depict the data has been successfully comitted to the database.
 
+&nbsp;
 
 We have not only introduced ORMs that represent tables with classes, but also removed raw SQL text and made querying and inserting data much easier. Let's look at some optimizations and make our codebase even better!
 
@@ -306,3 +307,5 @@ We have not only introduced ORMs that represent tables with classes, but also re
 >git checkout step-3-orms
 >```
 {: .block-tip }
+
+&nbsp;

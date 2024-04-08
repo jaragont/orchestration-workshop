@@ -61,7 +61,7 @@ def get_customers():
         return customers
 ```
 
-##### SQLAlchemy logs and standard output
+##### SQLAlchemy logs
 
 ```sql
 BEGIN (implicit)
@@ -206,9 +206,9 @@ def as_dict(self):
     }
 ```
 
-To use hybrid attributes in the SQL query, we need to use the [`hybrid_property.expression()`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property.expression) modifier. This is because its SQL expression must be differentiated from the Python expression.
+&nbsp;
 
-Above, we have also added an expression modifier to the `item_total` hybrid property. Notice how this function is a class method and operates on the `OrderItems` and `Item` classes, similar to how we might do in the `select()` query.
+To use hybrid attributes in the SQL query, we need to use the [`hybrid_property.expression()`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property.expression) modifier. This is because its SQL expression must be differentiated from the Python expression. Above, we've also added an expression modifier to the `item_total` hybrid property. Notice how this function is a class method and operates on the `OrderItems` and `Item` classes, similar to how we might do in the `select()` query.
 
 Writing `@classmethod` here is optional. It is used for type hinting to indicate `cls` is supposed to be the `OrderItems` class, and not its instance.
 
@@ -230,6 +230,8 @@ def get_total_cost_of_an_order(order_id):
 
 You might notice hybrid properties are similar to Python's `@property` decorator. We can also define [setters](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property.setter) on hybrid properties but it doesn't make sense to 'set' the item total in our case.
 
+&nbsp;
+
 We now have explored some ways how we can optimise our code using ORMs. There are many more techniques that would be hard to cover in a short span of time. Feel free to browse the SQLAlchemy [documentation](https://docs.sqlalchemy.org/en/20/index.html) to find ways to make your life easier! 
 
 Having said that, let's switch gears and look at asyncio, and how we can utilise it in our service.
@@ -241,3 +243,5 @@ Having said that, let's switch gears and look at asyncio, and how we can utilise
 >git checkout step-4-optimisations
 >```
 {: .block-tip }
+
+&nbsp;

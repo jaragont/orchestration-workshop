@@ -154,3 +154,5 @@ Now that we've updated the query execution functions, we just need to update the
 As we've done this already in step 3, go ahead and copy the correct SQL queries from your `sync` branch into this file.
 
 When you're done, your branch should match the results in `step-6-asyncio-sqlalchemy`.
+
+&nbsp;
