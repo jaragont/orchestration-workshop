@@ -166,6 +166,8 @@ Here, we're directly using the `SUM()` aggregate function and returning a single
 
 [Hybrid attributes](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html) have different behaviours at class and instance level, hence the name "hybrid". This is best explained with an example.
 
+### Hybrid Properties
+
 Let us consider the `order_items` table. The `quantity` of an order is defined here and the `price` of an item is defined in the `items` table. Whenever we want to get the total cost of an item, we have to multiply item price and quantity for each item in the order. 
 
 Alternatively, we could introduce a hybrid property that represents the total cost of an item. We can do this with the [`@hybrid_property`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property) decorator.
@@ -201,7 +203,7 @@ def as_dict(self):
     }
 ```
 
-&nbsp;
+### Hybrid Expressions
 
 ##### db/order_items.py
 
