@@ -50,7 +50,7 @@ Once our `Engine` object is ready, it will be used to connect to the database by
 
 We don't want to keep a `Connection` running indefinitely, and thus, the recommended way to use `Connection` is with context managers, which will frame the operations inside into a transaction, and will invoke `Connection.close()` at the end of the block.
 
-### Executing Queries
+## Executing Queries
 
 Here, we see how we can execute queries with SQLAlchemy. For now, we'll be using raw SQL. Let's update `execute_query()` in `db_accessor.py` to use the `Connection` using a context manager.
 
@@ -90,7 +90,7 @@ As you can see from the logs, a **ROLLBACK** was emitted at the end. This marked
 {: .block-tip }
 
 
-### Parameter Binding
+## Parameter Binding
 
 We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called [**bound parameters**](https://docs.sqlalchemy.org/en/20/glossary.html#term-bound-parameters). We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`, like `{"customer_id": 1}`.
 
@@ -102,7 +102,7 @@ We might want to select specific rows, or insert some data to the table. The `Co
 If we want to send multiple sets of parameters, such as insert multiple records in the table, we can pass a **list of dictionaries** to `Connection.execute()` and send multiple parameter sets. The SQL statement will be executed once for each parameter set.
 
 
-### Committing Data
+## Committing Data
 
 You might have noticed the absense of the **COMMIT** statement from the SQLAlchemy logs. If we want to commit some data, we need to explicitly call [`Connection.commit()`](https://docs.sqlalchemy.org/en/20/core/connections.html#sqlalchemy.engine.Connection.commit) inside the block.
 
