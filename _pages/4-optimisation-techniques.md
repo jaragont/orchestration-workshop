@@ -232,7 +232,7 @@ You might notice hybrid properties are similar to Python's `@property` decorator
 
 &nbsp;
 
-We now have explored some ways how we can optimise our code using ORMs. There are many more techniques that would be hard to cover in a short span of time. Feel free to browse the SQLAlchemy [documentation](https://docs.sqlalchemy.org/en/20/index.html) to find ways to make your life easier! 
+We now have explored some ways how we can optimise our code using ORMs. There are many more techniques that would be hard to cover in a short span of time. What we've discussed about SQLAlchemy is just the tip of the iceberg. Feel free to browse the SQLAlchemy [documentation](https://docs.sqlalchemy.org/en/20/index.html) to find ways to make your life easier!
 
 Having said that, let's switch gears and look at asyncio, and how we can utilise it in our service.
 

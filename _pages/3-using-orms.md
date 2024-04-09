@@ -1,5 +1,5 @@
 ---
-title: Using ORMs
+title: Using ORMs and Querying Data
 author: Aya Elsayed, Rhythm Patel
 category: SQLAlchemy Workshop
 date: 2024-01-04
@@ -11,7 +11,7 @@ In the previous step, we've added SQLAlchemy to our codebase, but we still haven
 ## ORM
 
 ORM stands for Object Relational Mapping, which lets us map the tables of a database to user-defined Python classes. The class attributes of the mapped class will be linked to columns of the table. 
-This structure is called **Declarative Mapping**, which simultaneously defines a Python object model and metadata describing the actual tables that exist in a particular database.
+This structure is called [**Declarative Mapping**](https://docs.sqlalchemy.org/en/20/tutorial/metadata.html#using-orm-declarative-forms-to-define-table-metadata), which simultaneously defines a Python object model and metadata describing the actual tables that exist in a particular database.
 
 Let's edit `db/base.py` to add a `Base` class that subclasses `DeclarativeBase`.
 
@@ -50,11 +50,18 @@ class Customer(Base):
 
 We indicate the name of the table by using the [`__tablename__`](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.DeclarativeBase.__tablename__) class-level attribute.
 
-We declare the columns by adding them as attributes along with a special type called [`Mapped`](https://docs.sqlalchemy.org/en/20/orm/internals.html#sqlalchemy.orm.Mapped), which is driven from [PEP 484](https://peps.python.org/pep-0484/). The name of each attribute corresponds to the name of the column in the table. The datatype is inferred from the `Mapped` type, such as `int` becomes `INTEGER`, `str` becomes `VARCHAR`, etc. 
+We declare the columns by adding them as attributes along with a special type called [`Mapped`](https://docs.sqlalchemy.org/en/20/orm/internals.html#sqlalchemy.orm.Mapped), which is driven from type annotations defined [PEP 484](https://peps.python.org/pep-0484/). The name of each attribute corresponds to the name of the column in the table. The datatype is inferred from the `Mapped` type, such as `int` becomes `INTEGER`, `str` becomes `VARCHAR`, etc. 
 
 For example: `name: Mapped[str]` is the `name` column of the `customer` table of datatype `VARCHAR`. Consequently, we can indicate nullable contraints in the column by `Mapped[str | None]`.
 
-To include additional specification for our attributes, we can use the [`mapped_column()`](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.mapped_column) construct, which will generate `Column` objects. We can use `mapped_column()` without annotations too. For example, `customer_name = mapped_column("name", String, nullable=False)` is also valid. Notice how it's possible for the class attribute to have a different name than the column. The datatype of the column is inferred from the [String](https://docs.sqlalchemy.org/en/20/core/type_basics.html#sqlalchemy.types.String) SQLAlchemy type object.
+To include additional specification for our attributes, we can use the [`mapped_column()`](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.mapped_column) construct, which will generate `Column` objects. We can use `mapped_column()` without annotations too. The following exampe is also valid.
+
+```py
+customer_name = mapped_column("name", String, nullable=False)
+``` 
+
+
+Notice how it's possible for the class attribute to have a different name than the column. The datatype of the column is inferred from the [String](https://docs.sqlalchemy.org/en/20/core/type_basics.html#sqlalchemy.types.String) SQLAlchemy type object.
 
 We also indicate the presense of the primary key with enabling the `primary_key` boolean parameter. If there is a composite key constraint, we can represent that by enabling the `primary_key` boolean flag for all the attributes that are a part of the composite key.
 
@@ -71,7 +78,7 @@ Finally, we have included a `__repr__()` method which is not necessary, but help
 
 ### Relationships
 
-Amazing! You've now created the `Address` ORM mapped class as well. As you might recollect, the tables `address` and `customer` are related, where the `address_id` column in `customer` is the foreign key to the `id` column in `address`. Let's represent this relationship in ORMs.
+Amazing! You've now created the `Address` ORM mapped class as well. As you may remember, the tables `address` and `customer` are related, where the `address_id` column in `customer` is the foreign key to the `id` column in `address`. Let's represent this relationship in ORMs.
 
 This is how `Address` will look like.
 
@@ -126,7 +133,7 @@ In our case, the `relationship()` construct, along with the `Mapped["Address"]` 
 
 The `lazy="joined"` parameter signifies that we've used joined relationship loading technique, a type of eager loading. We will talk about this in the next section in detail.
 
-We have applied a non-collection type to the `Mapped` annotation on both sides of the relationship, i.e. `Mapped["Address"]` in `Customer`, and `Mapped["Customer"]` in `Address`. With this, SQLAlchemy has determined that there is a **One to One** relationship.
+We have applied a singular type (rather than a collection) to the `Mapped` annotation on both sides of the relationship, i.e. `Mapped["Address"]` in `Customer`, and `Mapped["Customer"]` in `Address`. With this, SQLAlchemy has determined that there is a **One to One** relationship.
 
 > ##### Test Your Understanding
 > We've learned how to represent a One to One relationship. How do you think we would represent a One to Many relationship?
@@ -184,7 +191,7 @@ class Customer(Base):
 
 ## Querying Data
 
-We now have our `Customer` and `Address` ORMs set up. Querying data now becomes like magic! We eliminate the need of raw SQL statements and utilize the SQL Expression Language, which is extremely intuitive and almost readable in English.
+We now have our `Customer` and `Address` ORMs set up. We can now make full use of the SQL Expression Language and eliminate the need of raw SQL statements, which is extremely intuitive and almost readable in English, thus allowing us to query data like magic!
 
 Let's update the `get_customers()` function in `db/accessor.py`.
 
@@ -235,7 +242,11 @@ The following will be the value of `customers`. Notice how also have address of 
 
 Inserting data is quite simple too. Within the ongoing transaction, the `Session` object becomes responsible for generating [`Insert`](https://docs.sqlalchemy.org/en/20/core/dml.html#sqlalchemy.sql.expression.Insert) constructs and emit **INSERT** statements. We can do this by adding the ORM objects to the session by the [`Session.add()`](https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session.add) method.
 
-Instances of the mapped classes represent rows. Thanks to the automatically generated `__init__()` constructor of mapped classes, we can instantiate objects using names of the columns as keyword arguments. For example: `address = Address(flat_number=101, post_code=10001)`. Keep in mind that the ids are generated automatically due to the database's auto incrementing feature for the primary key.
+Instances of the mapped classes represent rows. Thanks to the automatically generated `__init__()` constructor of mapped classes, we can instantiate objects using names of the columns as keyword arguments. Keep in mind that the ids are generated automatically due to the database's auto incrementing feature for the primary key. For example: 
+
+```py
+address = Address(flat_number=101, post_code=10001)
+```
 
 Having said that, let's update our `add_new_order_for_customer()` function in `db_accessor.py`.
 
@@ -275,9 +286,9 @@ Adding `OrderItems` becomes quite effortless now. We can just assign a list of `
 
 After we call `session.add(new_order)`, the object is still in pending state and has not been inserted yet. The transaction still remanins open until we call [`Session.commit()`](https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session.commit), or when the context manager automatically calls [`Session.rollback()`](https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session.rollback) and/or [`Session.close()`](https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session.close).
 
-We can **commit** these changes to the database by calling `Session.commit()`. If the transaction is successful, a **COMMIT** statement will be logged. Otherwise, a **ROLLBACK** will be logged.
+We can **commit** these changes to the database by calling `Session.commit()`. If the transaction is successful, a **COMMIT** statement will be logged and the data will get persisted. Otherwise, a **ROLLBACK** will be logged.
 
-Do you recall when we talked about bound parameters? The SQL expression language in ORMs uses bound parameters by default. 
+Do you recall when we talked about bound parameters? The SQL expression language uses bound parameters by default. 
 
 ##### Logs generated by SQLAlchemy
 
@@ -295,6 +306,11 @@ COMMIT
 ```
 
 The first **SELECT** statement is to fetch the existing customer with the given `customer_id`. The first **INSERT** statement inserts data into the `orders` table and returns the generated `id` of the new inserted order. The second **INSERT** statement inserts multiple records to the `order_items` table using the same `id`. Notice how SQLAlchemy is using bound parameters for all the statements. Finally, we have a **COMMIT** to depict the data has been successfully comitted to the database.
+
+> ##### Did you Know?
+>
+> It's possible to emit DDL statements and create tables in the database from the ORM mapped classes, using [`Base.metadata.create_all(engine)`](https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.MetaData.create_all). See [this section](https://docs.sqlalchemy.org/en/20/orm/quickstart.html#emit-create-table-ddl) of SQLAlchemy docs for more details.
+{: .block-tip }
 
 &nbsp;
 
