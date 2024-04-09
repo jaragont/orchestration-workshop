@@ -8,13 +8,13 @@ layout: post
 
 In the last step, we learned about `asyncio`.
 Now let's see how we can use SQLAlchemy with an async service.
-To start, checkout the branch `step-6-asyncio-asyncpg`:
+To start, checkout the branch `step-6-asyncio-sqlalchemy-base`:
 
 ```sh
-git checkout step-6-asyncio-asyncpg
+git checkout step-6-asyncio-sqlalchemy-base
 ```
 
-This is an async version of the service we say in `step-1-psychopg2`.
+This is an async version of the service we saw in `main`.
 Except it uses the the [`async` flavour of `Flask`](https://flask.palletsprojects.com/en/3.0.x/async-await/) and the [postgres async package `asyncpg`](https://magicstack.github.io/asyncpg/current/).
 
 Since we've installed new packages, let's add them to our `venv` so we can get intellisense for these packages.
@@ -154,5 +154,13 @@ Now that we've updated the query execution functions, we just need to update the
 As we've done this already in step 3, go ahead and copy the correct SQL queries from your `sync` branch into this file.
 
 When you're done, your branch should match the results in `step-6-asyncio-sqlalchemy`.
+
+> ##### Kudos!
+>
+> 🙌 You have now reached the `step-6-asyncio-sqlalchemy-solved` part of the tutorial. If not, checkout that branch and continue from there:
+>```sh
+>git checkout step-6-asyncio-sqlalchemy-solved
+>```
+{: .block-tip }
 
 &nbsp;

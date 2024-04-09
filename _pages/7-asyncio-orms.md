@@ -8,7 +8,7 @@ layout: post
 
 Now that we've learned how to use SQLAlchemy with `asyncio`, it's time to bring back our ORMs.
 
-To start, checkout the branch `step-7-asyncio-orms`:
+To start, checkout the branch `step-7-asyncio-orms-base`:
 
 ```sh
 git checkout step-7-asyncio-orms
@@ -16,28 +16,37 @@ git checkout step-7-asyncio-orms
 
 This essentially builds on the work we've done in `step-3-orms` but uses the async engine we added in the previous step.
 
-So in this step, we'll learn how to use the async version of [the 2.0 style queries](https://docs.sqlalchemy.org/en/14/glossary.html#term-2.0-style) we learned about in `step-3-orms`.
+So in this step, we'll learn how to use the async version of SQL Query expression language we learned about in `step-3-orms`.
 
 To do this, we'll use [`AsyncSession`](https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncSession).
+Since we [need a dedicated session per connection](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#using-asyncsession-with-concurrent-tasks), we'll use a factory to create our `AsyncSession`s.
 
-So let's start in `db/base.py` add the following imports:
+To do this, we'll start in `db/base.py` add the following imports:
 
 ```py
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncAttrs
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import (
+    AsyncAttrs,
+    async_sessionmaker,
+    create_async_engine,
+)
 ```
 
-Next, replace the `engine` definition with:
+Next, we create an `async_sessionmaker` to create our `AsyncSession` instances:
 
 ```py
-def async_session_maker():
-    engine = create_async_engine(url_object, echo=True)
-    return async_sessionmaker(engine, expire_on_commit=False)
+engine = create_async_engine(url_object, poolclass=NullPool, echo=True)
+async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 ```
 
 This returns an `AsyncSession` object that we can use in `db_accessor.py`.
 
-Finally, we need to update our `Base` class to use the `AsyncAttrs` mixin.
+Finally, we need to update our `Base` class to use the `AsyncAttrs` mixin:
+
+```py
+class Base(AsyncAttrs, DeclarativeBase):
+    pass
+```
+
 This mixin allows us to access attributes of any ORM class as an awaitable through the `.awaitable_attrs` attribute.
 This is useful for attributes with lazy/deferred loading, as accessing the attribute directly will mean an implicit IO call to the database.
 To prevent implicit IO calls with `asyncio`, we access lazily-loaded attributes as awaitables like so:
@@ -110,13 +119,18 @@ Again, we use the `async` version of the `session`.
 What operations do you think we need to `await` here?
 
 - `session.execute()`
-- `session.flush()`
+- `session.add()`
 - `session.commit()`
 
 Continue the rest of the queries now.
 
-When you're done, your branch should match `step-7-asyncio-orms`
-
-We are all done now!
+> ##### Kudos!
+>
+> 🙌 You are all done! You've reached the final step of the tutorial.
+> Your code should now match `step-7-asyncio-orms-solved`
+>```sh
+>git checkout step-7-asyncio-orms-solved
+>```
+{: .block-tip }
 
 &nbsp;
