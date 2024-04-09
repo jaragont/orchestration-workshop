@@ -191,7 +191,7 @@ class Customer(Base):
 
 ## Querying Data
 
-We now have our `Customer` and `Address` ORMs set up. We can now make full use of the SQL Expression Language and eliminate the need of raw SQL statements, which is extremely intuitive and almost readable in English, thus allowing us to query data like magic!
+We now have our `Customer` and `Address` ORMs set up. We can now make _full use_ of the SQL Expression Language and eliminate the need of raw SQL statements, which is extremely intuitive and almost readable in English, thus allowing us to query data like magic!
 
 Let's update the `get_customers()` function in `db/accessor.py`.
 
