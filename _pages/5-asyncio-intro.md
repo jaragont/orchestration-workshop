@@ -192,7 +192,7 @@ python 05-async_for.py
 You'll notice that each loop iteration executes when the async generator has produced a new value, which happens at intervals that are 1s apart.
 This can be useful so that you can schedule other work while waiting for values to be produced.
 
-As an example, uncomment L26-L29 and re-run the file.
+As an example, uncomment L27 and the coroutine function `deliver_order()` and re-run the file.
 You can see that we can schedule other work to be done while waiting on the async generator.
 
 ## Using Queues
