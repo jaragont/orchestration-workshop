@@ -89,9 +89,6 @@ As you can see from the logs, a **ROLLBACK** was emitted at the end. This marked
 > Try building and running the other queries yourself, and see the logs to understand what's happening behind the scenes.
 {: .block-tip }
 
-### Committing Data
-
-You might have noticed the absense of the **COMMIT** statement from the SQLAlchemy logs. If we want to commit some data, we need to explicitly call `Connection.commit()` inside the block.
 
 ### Parameter Binding
 
@@ -105,6 +102,10 @@ We might want to select specific rows, or insert some data to the table. The `Co
 If we want to send multiple sets of parameters, such as insert multiple records in the table, we can pass a **list of dictionaries** to `Connection.execute()` and send multiple parameter sets. The SQL statement will be executed once for each parameter set.
 
 
+### Committing Data
+
+You might have noticed the absense of the **COMMIT** statement from the SQLAlchemy logs. If we want to commit some data, we need to explicitly call [`Connection.commit()`](https://docs.sqlalchemy.org/en/20/core/connections.html#sqlalchemy.engine.Connection.commit) inside the block.
+
 Let's update the `execute_insert_query()` to invoke `Connection.commit()`.
 
 ```py
@@ -113,10 +114,10 @@ def execute_insert_query(query, params=None):
         result = conn.execute(text(query), params)
         conn.commit()
 
-        return next(row._asdict() for row in result)["id"]
+        return result.scalar()
 ```
 
-Let's bind some parameters to the query in `add_new_order_for_customer()`.
+Let's also bind some parameters to the query in `add_new_order_for_customer()`.
 
 ```py
 def add_new_order_for_customer(customer_id, items):
@@ -147,6 +148,8 @@ COMMIT
 ```
 
 As you can see, `conn.commit()` committed the transaction, and the statement **COMMIT** is logged, as compared to **ROLLBACK** in the previous example. We can then call `conn.commit()` for committing additional statements. This style is called **commit as you go**. Additionally, notice how the parameter `customer_id` is passed into the SQL statement. We'll talk about this later.
+
+&nbsp;
 
 Another way to commit data is to use the context manager `Engine.begin()` instead of `Engine.connect()`. It will declare the whole block to be one transcation block, and will enclose everything inside the transaction with one **COMMIT** at the end. This method is called **begin once**.
 
