@@ -114,7 +114,7 @@ def execute_insert_query(query, params=None):
         result = conn.execute(text(query), params)
         conn.commit()
 
-        return result.scalar()
+        return result.one()._asdict()
 ```
 
 Let's also bind some parameters to the query in `add_new_order_for_customer()`.
@@ -131,7 +131,7 @@ def add_new_order_for_customer(customer_id, items):
             RETURNING id
             """,
             {"customer_id": customer_id},
-        )
+        )["id"]
         
         return True
 
