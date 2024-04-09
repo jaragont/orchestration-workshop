@@ -85,25 +85,18 @@ Like we did in step 3, create a new file `marketsvc/db/base.py` with the followi
 import os
 from sqlalchemy import create_engine, URL
 from sqlalchemy.ext.asyncio import create_async_engine
-
-DB_USER = os.environ.get("POSTGRES_USER")
-DB_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
-DB_PORT = os.environ.get("POSTGRES_PORT")
-DB_NAME = os.environ.get("POSTGRES_DB")
-DB_HOST = "marketdb"
+from sqlalchemy.pool import NullPool
 
 url_object = URL.create(
     "postgresql+asyncpg",
-    username=DB_USER,
-    password=DB_PASSWORD,
-    host=DB_HOST,
-    database=DB_NAME,
-    port=DB_PORT,
+    username=os.environ.get("POSTGRES_USER"),
+    password=os.environ.get("POSTGRES_PASSWORD"),
+    host=os.environ.get("POSTGRES_DB"),
+    database=os.environ.get("POSTGRES_DB"),
+    port=os.environ.get("POSTGRES_PORT"),
 )
 
-
-def create_engine():
-    return create_async_engine(url_object, echo=True)
+engine = create_async_engine(url_object, poolclass=NullPool, echo=True)
 ```
 
 Do these steps look familiar?
@@ -111,7 +104,8 @@ There are two key differences here:
 
 1. the dialect of postgres in the `URL` object is now `asyncpg`, so we use `"postgresql+asyncpg"`.
 2. we now use `create_async_engine()` to create an [`AsyncEngine`](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncEngine).
-    `echo=True` enables log output.
+    - `echo=True` enables log output.
+    - `poolclass=NullPool` allows the same `engine` instance to be [reused across multiple event loops](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#using-multiple-asyncio-event-loops). This is needed because of [the way flask implements it's async requests](https://flask.palletsprojects.com/en/3.0.x/async-await/#performance).
 
 Next, we'll update the functions that execute our queries to use SQLAlchemy.
 
