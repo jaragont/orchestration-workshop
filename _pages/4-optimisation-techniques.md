@@ -76,7 +76,7 @@ SELECT address.id AS address_id, address.flat_number AS address_flat_number, add
 ROLLBACK
 ```
 
-Here, the first **SELECT** statement only fetches the attributes linked to `Customer` i.e. `id`, `name`, and `address_id`. We then have 3 more **SELECT** statements to fetch address data for a particular `address_id` as seen with the **WHERE** clause and the bound parameter. This occurs for **each** customer.
+Here, the first **SELECT** statement only fetches the attributes linked to `Customer` i.e. `id`, `name`, and `address_id`. Since we added `print` to print address details for each customer, we have 3 more **SELECT** statements to fetch address data for a particular `address_id`, as seen with the **WHERE** clause and the bound parameter. This occurs for **each** customer.
 
 > ##### What if?
 >
@@ -119,7 +119,7 @@ Here, you can see how we only emit 1 query to the database. The query has a **JO
 
 ### No Loading
 
-No loading means to disable loading on a relationship. The child object is empty and is never loaded, or an error is raised with its accessed. No loading is used to prevent unwanted lazy loads.
+No loading means to disable loading on a relationship. The child object is empty and is never loaded, or an error is raised with its accessed. No loading is used to prevent unwanted lazy loads. You can trigger this with the [`lazy="raise"`](https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html#prevent-lazy-with-raiseload) parameter.
 
 > ##### Try It Yourself
 >
@@ -131,7 +131,7 @@ No loading means to disable loading on a relationship. The child object is empty
 
 You can also use SQL functions including aggregate functions while working with ORMs. We can create [`Function`](https://docs.sqlalchemy.org/en/20/core/functions.html#sqlalchemy.sql.functions.Function) objects by using the [`func`](https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.func) object, which acts as a factory.
 
-Let's use the `SUM()` function to get the total cost of an order in the SQL query itself, rather than us doing it in Python. 
+Let's use the `SUM()` function to get the total cost of an order in the SQL query itself, rather than querying the individual items prices and summing them up in Python. 
 
 ```py
 from sqlalchemy.sql import func
@@ -181,11 +181,6 @@ class OrderItems(Base):
     @hybrid_property
     def item_total(self):
         return self.item.price * self.quantity
-
-    @item_total.expression
-    @classmethod
-    def item_total(cls):
-        return Item.price * cls.quantity
 ```
 
 Here, the `item_total` property returns the product of item's price and the quantity of that item bought. On instances of `OrderItems`, the multiplication occurs in Python.
@@ -208,9 +203,27 @@ def as_dict(self):
 
 &nbsp;
 
-To use hybrid attributes in the SQL query, we need to use the [`hybrid_property.expression()`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property.expression) modifier. This is because its SQL expression must be differentiated from the Python expression. Above, we've also added an expression modifier to the `item_total` hybrid property. Notice how this function is a class method and operates on the `OrderItems` and `Item` classes, similar to how we might do in the `select()` query.
+##### db/order_items.py
 
-Writing `@classmethod` here is optional. It is used for type hinting to indicate `cls` is supposed to be the `OrderItems` class, and not its instance.
+```py
+from sqlalchemy.ext.hybrid import hybrid_property
+
+class OrderItems(Base):
+    ...
+
+    @hybrid_property
+    def item_total(self):
+        return self.item.price * self.quantity
+
+    @item_total.expression
+    @classmethod
+    def item_total(cls):
+        return Item.price * cls.quantity
+```
+
+To use hybrid attributes in the SQL query, we need to use the [`hybrid_property.expression()`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property.expression) modifier. This is because its SQL expression must be differentiated from the Python expression.
+
+Above, we've also added an expression modifier to the `item_total` hybrid property. Notice how this function is a class method and operates on the `OrderItems` and `Item` classes, similar to how we might do in the `select()` query.
 
 Consequently, our query to get the total cost of an order becomes even simpler. Here, we have directly accessed the hybrid expression in the query.
 
@@ -227,6 +240,8 @@ def get_total_cost_of_an_order(order_id):
 
         return total_cost
 ```
+
+`OrderItems.item_total` would be equivalent to `Item.price * OrderItems.quantity` used earlier.
 
 You might notice hybrid properties are similar to Python's `@property` decorator. We can also define [setters](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property.setter) on hybrid properties but it doesn't make sense to 'set' the item total in our case.
 
