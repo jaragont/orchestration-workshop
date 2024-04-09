@@ -92,7 +92,14 @@ As you can see from the logs, a **ROLLBACK** was emitted at the end. This marked
 
 ## Parameter Binding
 
-We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called [**bound parameters**](https://docs.sqlalchemy.org/en/20/glossary.html#term-bound-parameters). We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`, like `{"customer_id": 1}`.
+We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called [**bound parameters**](https://docs.sqlalchemy.org/en/20/glossary.html#term-bound-parameters). We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`.
+
+```py
+conn.execute(
+            text("SELECT * FROM customer WHERE id=:customer_id"),
+            {"customer_id": 1},
+        )
+```
 
 > ##### WARNING
 > 
@@ -155,7 +162,7 @@ Another way to commit data is to use the context manager `Engine.begin()` instea
 
 ```py
 with engine.begin() as conn:
-    result = conn.execute(text("ISERT INTO orders..."), params)
+    result = conn.execute(text("INSERT INTO orders..."), params)
 ```
 
 ##### SQLAlchemy logs:

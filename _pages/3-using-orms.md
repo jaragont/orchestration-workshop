@@ -235,7 +235,7 @@ The following will be the value of `customers`. Notice how also have address of 
 
 > ##### Test Your Understanding
 >
-> Try creating mapped classes for the other tables as well in the `db/` folder. If you need a reference, feel free to look at the `step-3-orms` branch to see how we've built the mapped classes. 
+> Try creating mapped classes for the other tables as well in the `db/` folder, and updating the queries to use the ORMs in `db_accessor.py`. If you need a reference, feel free to look at the `step-3-orms` branch to see how we've built the mapped classes. 
 {: .block-tip }
 
 ## Inserting Data
