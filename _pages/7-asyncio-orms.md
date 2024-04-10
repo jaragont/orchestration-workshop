@@ -7,11 +7,12 @@ layout: post
 ---
 
 Now that we've learned how to use SQLAlchemy with `asyncio`, it's time to bring back our ORMs.
+We'll also look at how to use the async version of the SQL Expression language we learned about in `step-3-orms`.
 
 To start, checkout the branch `step-7-asyncio-orms-base`:
 
 ```sh
-git checkout step-7-asyncio-orms
+git checkout step-7-asyncio-orms-base
 ```
 
 This essentially builds on the work we've done in `step-3-orms` but uses the async engine we added in the previous step.
@@ -55,7 +56,14 @@ To prevent implicit IO calls with `asyncio`, we access lazily-loaded attributes 
 await my_obj.awaitable_attrs.my_attr
 ```
 
-Note that SQLAlchemy will throw an exception if an implicit IO call is made.
+Note that SQLAlchemy will throw an exception if an implicit IO call is in `async` mode.
+
+For example, if `Customer` had a lazily-loaded relationship to `Address`.
+To access `address`, I need to `await` another SELECT statement to be executed.
+
+```py
+address = await customer.awaitable_attrs.address
+```
 
 We elected to use `expire_on_commit=False` so we can access queried objects after a `session.commit()`
 
@@ -81,18 +89,20 @@ async def get_customers():
     async with async_session() as session:
 ```
 
-Using the session's context manager means we do not have to explicitly call session.close() when we are done.
+Using the session's context manager means we do not have to explicitly call `session.close()` when we are done.
 
 Next, since we want to stream one customer object at a time rather query them all at once, we'll use the `stream_scalars()` API:
 
 ```py
+    async with async_session_maker() as session:
+        stmt = select(Customer)
         async for customer in await session.stream_scalars(stmt):
-            yield customer.as_dict()
+            yield customer
 ```
 
 > ##### Test Your Understanding
 >
-> `customer.as_dict()` accesses `customer.address`. Why does SQLAlchemy not complain that we do not await the load of `customer.address`?
+> In `server.py`, we call `customer.as_dict()` which accesses `customer.address`. Why does SQLAlchemy not complain that we do not await the load of `customer.address`?
 >
 > _HINT_: what type of loading is used for `address` in the `Customer` ORM class?
 {: .block-tip }
@@ -106,7 +116,7 @@ async def get_total_cost_of_an_order(order_id):
     async_session = async_session_maker()
     async with async_session() as session:
         result = await session.execute(
-            select(func.sum(Item.price * OrderItems.quantity).label("total_cost"))
+            select(func.sum(OrderItems.item_total_expression)
             .join(Orders.order_items)
             .join(OrderItems.item)
             .where(Orders.id == order_id)
@@ -114,15 +124,46 @@ async def get_total_cost_of_an_order(order_id):
         return result.scalar()
 ```
 
-Finally, we'll walk you through updating `insert_order_items()`.
-Again, we use the `async` version of the `session`.
+Finally, for `insert_order_items()`, we use the `async` version of the `session`.
 What operations do you think we need to `await` here?
 
 - `session.execute()`
 - `session.add()`
 - `session.commit()`
 
-Continue the rest of the queries now.
+```py
+async def add_new_order_for_customer(customer_id, items):
+    try:
+        async with async_session_maker() as session:
+            result = await session.execute(
+                select(Customer).where(customer_id == customer_id)
+            )
+            customer = result.scalar()
+
+            new_order = Orders(
+                customer_id=customer_id,
+                order_time=datetime.now(),
+                customer=customer,
+            )
+
+            new_order.order_items = [
+                OrderItems(
+                    item_id=item["id"],
+                    quantity=item["quantity"],
+                )
+                for item in items
+            ]
+
+            session.add(new_order)
+            await session.commit()
+        return True
+
+    except Exception:
+        logging.exception("Failed to add new order")
+        return False
+```
+
+You may continue updating the rest of the queries to use the async version of the SQL expression language.
 
 > ##### Kudos!
 >

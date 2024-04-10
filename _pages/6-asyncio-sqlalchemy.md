@@ -30,7 +30,7 @@ Now, let's read through a few key files.
 You'll notice here a number of requests that have an async implementation use the keyword `async`.
 
 For requests where we anticipate a potentially large number of items to be returned, an async generator was used in the implementation.
-For example, in `/api/customers`, `get_customers()` returns an async generator that we then consume to return a response.
+For example, in `/api/customers`, `get_customers()` returns an async generator from via `stream_query()` that we then consume to return a response.
 In a real life example, you may want to opt for a multi-part response to your request so that you don't have to load all the contents in memory at once.
 
 For requests that don't require large amounts of data to be loaded in memory, like `/api/order_total`, we simply `await` the async version of the implementation, before we return the response.
@@ -39,6 +39,13 @@ You'll also notice, there's a new request `/api/orders_total` which calculates t
 This request exercises `asyncio.TaskGroup()` which we've learned about in the previous step.
 It kicks off a number of concurrent tasks `get_total_cost_of_an_order()` for each order.
 When they are done, it returns a list of the results of all the tasks.
+
+> _NOTE_
+>
+> While `/api/orders_total` can be implemented more efficiently using a single SQL query.
+> We are using this as an example of `TaskGroup()`.
+> In a real life example, you will have other tasks to perform where you can truly benefit from concurrency.
+
 
 ### db_accessor.py
 
@@ -112,10 +119,9 @@ Next, we'll update the functions that execute our queries to use SQLAlchemy.
 For `execute_query()`, update it to the following:
 
 ```py
-async def execute_query(query, params=None, insert=False):
-    async with create_engine().begin() as conn:
-        result = await conn.execute(text(query), params)
-        return [row._asdict() for row in result]
+async def execute_query(query, params=None):
+    async with engine.begin() as conn:
+        return await conn.execute(text(query), params)
 ```
 
 What does this mean?
@@ -128,26 +134,27 @@ For `execute_insert_query()`, update it to the following:
 
 ```py
 async def execute_insert_query(query, params):
-    async with create_engine().begin() as conn:
-        await conn.execute(text(query), params)
+    async with engine.begin() as conn:
+        result = await conn.execute(text(query), params)
+        await conn.commit()
+        return result
 ```
-
-Next, for the insert case, we now understand why this suffices.
 
 Finally, for `stream_query()`, we'll use [`AsyncConnection.stream()`](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncConnection.stream) which allows us to asyncronoushly loop over the results:
 
 ```py
-async def stream_query(query, params=None, insert=False):
-    async with create_engine().begin() as conn:
+async def stream_query(query, params=None):
+    async with engine.begin() as conn:
         result = await conn.stream(text(query), params)
         async for row in result:
-            yield row._asdict()
+            yield row
 ```
 
-Now that we've updated the query execution functions, we just need to update the SQL queries to use the syntax expected by SQLAlchemy.
-As we've done this already in step 3, go ahead and copy the correct SQL queries from your `sync` branch into this file.
+Now that we've updated the query execution functions, we just need to update the SQL queries to use the syntax expected by SQLAlchemy as we've done in `step-2-sqlalchemy`.
+Alternatively, you can just checkout `step-6-asyncio-sqlalchemy-solved`.
 
-When you're done, your branch should match the results in `step-6-asyncio-sqlalchemy`.
+Run the service, and play around with it.
+
 
 > ##### Kudos!
 >
