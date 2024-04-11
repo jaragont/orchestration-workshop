@@ -58,7 +58,7 @@ Hit "install" to install them.
 
 ## Creating a virtual environment
 
-To get [intellisense](https://code.visualstudio.com/docs/editor/intellisense) working, we'll be installing the Python dependencies we use in a Python virtual environment (`venv`).
+To get [intelliSense](https://code.visualstudio.com/docs/editor/intellisense) working, we'll be installing the Python dependencies we use in a Python virtual environment (`venv`).
 Then, we'll point the `Python` extension to our `venv` Python path so that `Codespaces` can recognise the modules we use in our code.
 
 1. In the previous section, you should have installed the `Python` extension.
