@@ -22,7 +22,7 @@ Do not worry about installing them, we'll be installing the required tools when 
 
 ## Creating your Project
 
-Throughout this workshop, we'll be using an example project `MarketPlace` (TODO: insert link).
+Throughout this workshop, we'll be using an example project `Marketplace` (TODO: insert link).
 It is a simple micro-service that manages a `postgres` database of orders and customers.
 The micro-service currently uses raw SQL to manage the database, we'll be incrementally working on it to replace the raw SQL with SQLAlchemy, make use of ORMs and optimise our access patterns.
 
@@ -30,7 +30,7 @@ After each step, you can refer to the corresponding completed version of the cod
 
 Now, let's get started!
 
-1. Visit the [example repo: SQLAlchemy Workshop](https://github.com/rhythm-patel/sqlalchemy-workshop) and hit the button "Use Template" > "Create new repository".
+1. Visit the [example repo](https://github.com/rhythm-patel/sqlalchemy-workshop) and hit the button "Use Template" > "Create new repository".
 You will be redirected to a page to create a new repository in your org based on our example repo.
 
 ![image1](/sqlalchemy-wkshop/assets/gitbook/images/use_template.png)
