@@ -105,7 +105,7 @@ As a result, eager loading is the right choice for `Customer` and `Address` rela
 
 Let's update the `relationship()` in both `Customer` and `Address` to `lazy="joined"`, and run the request to get the customer information.
 
-##### SQLAlchemy Logs
+##### SQLAlchemy logs
 
 ```sql
 BEGIN (implicit)

@@ -78,17 +78,7 @@ def get_customers():
     return rows
 ```
 
-##### SQLAlchemy logs:
-```sql
-BEGIN (implicit)
-SELECT * FROM customer
-[generated in 0.00021s] {}
-ROLLBACK
-```
-
 The statement is executed with the `Connection.execute()` function, which returns a `Result` that represents an iterable object of resulting rows, depicted by `Row`.
-
-As you can see from the logs, a **ROLLBACK** was emitted at the end. This marked the of the transaction. An automatic rollback occurs when a connection is closed after use, to ensure that the connection is 'clean' for its next use.
 
 In order to format the response correctly, let's edit the `customers()` function in `server.py` to get the `Row` objects as dictionaries.
 
@@ -102,11 +92,21 @@ def customers():
     return jsonify(response)
 ```
 
-At this point, the API to fetch customers should be updated with SQLAlchemy. Try it with:
+At this point, the API to fetch customers is updated to use SQLAlchemy. Try it with:
 
 ```sh
 ./run.sh customers
 ```
+
+##### SQLAlchemy logs:
+```sql
+BEGIN (implicit)
+SELECT * FROM customer
+[generated in 0.00021s] {}
+ROLLBACK
+```
+
+As you can see from the logs, a **ROLLBACK** was emitted at the end. This marked the of the transaction. An automatic rollback occurs when a connection is closed after use, to ensure that the connection is 'clean' for its next use.
 
 > ##### Test Your Understanding
 >
