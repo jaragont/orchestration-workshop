@@ -15,14 +15,19 @@ Let's create `db/base.py` in the `marketsvc` folder to keep the database connect
 
 Here we create the [`Engine`](https://docs.sqlalchemy.org/en/20/core/engines.html) object, which is the entry point of any SQLAlchemy application. The `Engine` serves as the main source of DBAPI connections to a given database. 
 
+##### marketsvc/db/base.py
+
 ```py
+import os
+from sqlalchemy import URL, create_engine
+
 url_object = URL.create(
     "postgresql+psycopg2",
-    username=DB_USER,
-    password=DB_PASSWORD,
-    host=DB_HOST,
-    database=DB_NAME,
-    port=DB_PORT,
+    username=os.environ.get("POSTGRES_USER"),
+    password=os.environ.get("POSTGRES_PASSWORD"),
+    host=os.environ.get("POSTGRES_DB"),
+    database=os.environ.get("POSTGRES_DB"),
+    port=os.environ.get("POSTGRES_PORT"),
 )
 
 engine = create_engine(url_object, echo=True)
@@ -54,17 +59,18 @@ We don't want to keep a `Connection` running indefinitely, and thus, the recomme
 
 Here, we see how we can execute queries with SQLAlchemy. For now, we'll be using raw SQL. Let's update `execute_query()` in `db_accessor.py` to use the `Connection` using a context manager.
 
+##### marketsvc/db_accessor.py
+
 ```py
 from db.base import engine
+from sqlalchemy import text
 
 def execute_query(query, params=None):
     with engine.connect() as conn:
-        result = conn.execute(text(query), params)
-
-        return result
+        return conn.execute(text(query), params)
 ```
 
-The `get_customers()` function will then call `execute_query()`.
+The `get_customers()` function in `db_accessor.py` will then call `execute_query()`.
 
 ```py
 def get_customers():
@@ -84,6 +90,24 @@ The statement is executed with the `Connection.execute()` function, which return
 
 As you can see from the logs, a **ROLLBACK** was emitted at the end. This marked the of the transaction. An automatic rollback occurs when a connection is closed after use, to ensure that the connection is 'clean' for its next use.
 
+In order to format the response correctly, let's edit the `customers()` function in `server.py` to get the `Row` objects as dictionaries.
+
+##### marketsvc/server.py
+
+```py
+@app.route("/api/customers")
+def customers():
+    customers = get_customers()
+    response = [customer._asdict() for customer in customers]
+    return jsonify(response)
+```
+
+At this point, the API to fetch customers should be updated with SQLAlchemy. Try it with:
+
+```sh
+./run.sh customers
+```
+
 > ##### Test Your Understanding
 >
 > Try building and running the other queries yourself, and see the logs to understand what's happening behind the scenes.
@@ -92,7 +116,7 @@ As you can see from the logs, a **ROLLBACK** was emitted at the end. This marked
 
 ## Parameter Binding
 
-We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called [**bound parameters**](https://docs.sqlalchemy.org/en/20/glossary.html#term-bound-parameters). We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`.
+We might want to select specific rows, or insert some data to the table. The `Connection.execute()` function can accept parameters called [**bound parameters**](https://docs.sqlalchemy.org/en/20/glossary.html#term-bound-parameters). We indicate the presense of parameters in the `text()` construct by using colons, such as `:customer_id`. We can then send the actual value of these parameters as a dictionary in the second argument of `Connection.execute()`; for example,
 
 ```py
 conn.execute(
@@ -113,15 +137,16 @@ If we want to send multiple sets of parameters, such as insert multiple records 
 
 You might have noticed the absense of the **COMMIT** statement from the SQLAlchemy logs. If we want to commit some data, we need to explicitly call [`Connection.commit()`](https://docs.sqlalchemy.org/en/20/core/connections.html#sqlalchemy.engine.Connection.commit) inside the block.
 
-Let's update the `execute_insert_query()` to invoke `Connection.commit()`.
+Let's update `execute_insert_query()` to invoke `Connection.commit()`.
+
+##### marketsvc/db_accessor.py
 
 ```py
 def execute_insert_query(query, params=None):
     with engine.connect() as conn:
         result = conn.execute(text(query), params)
         conn.commit()
-
-        return result.one()._asdict()
+        return result
 ```
 
 Let's also bind some parameters to the query in `add_new_order_for_customer()`.
@@ -129,8 +154,8 @@ Let's also bind some parameters to the query in `add_new_order_for_customer()`.
 ```py
 def add_new_order_for_customer(customer_id, items):
     try:
-        new_order_id = execute_insert_query(
-            """
+        result = execute_insert_query(
+            """`
             INSERT INTO orders
                 (customer_id, order_time)
             VALUES
@@ -138,7 +163,8 @@ def add_new_order_for_customer(customer_id, items):
             RETURNING id
             """,
             {"customer_id": customer_id},
-        )["id"]
+        )
+        new_order_id = result.one().id
         
         return True
 
@@ -154,7 +180,7 @@ INSERT INTO orders (customer_id, order_time) VALUES (%(customer_id)s, NOW()) RET
 COMMIT
 ```
 
-As you can see, `conn.commit()` committed the transaction, and the statement **COMMIT** is logged, as compared to **ROLLBACK** in the previous example. We can then call `conn.commit()` for committing additional statements. This style is called **commit as you go**. Additionally, notice how the parameter `customer_id` is passed into the SQL statement. We'll talk about this later.
+As you can see, `conn.commit()` committed the transaction, and the statement **COMMIT** is logged, as compared to **ROLLBACK** in the previous example. We can then call `conn.commit()` for committing additional statements. This style is called **commit as you go**. 
 
 &nbsp;
 
@@ -181,8 +207,15 @@ If an exception occurs duing the transaction, the changes will be rolled back an
 
 > ##### Test Your Understanding
 >
-> Complete the `execute_insert_queries()` function to execute multiple insert queries. Can you predict the resulting SQLAlchemy logs when `add_new_order_for_customer()` is called?
+> Use the `execute_insert_query()` function in `add_new_order_for_customer()` to add multiple rows to the `order_items` table by using a list of dictionaries in the bound parameters. Can you predict the resulting SQLAlchemy logs when the method is called?
 {: .block-tip }
+
+
+Once you've implemented this, you can hit the `add_new_order` API to add an  order. To make this easier, you can use the following command:
+
+```sh
+./run.sh neworder
+```
 
 &nbsp;
 
