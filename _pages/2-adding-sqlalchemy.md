@@ -92,7 +92,7 @@ def customers():
     return jsonify(response)
 ```
 
-At this point, the API to fetch customers is updated to use SQLAlchemy. Try it with:
+At this point, the API to fetch customers is updated to use SQLAlchemy. Hit the `/customers` API using curl, or use the shell script to make hitting APIs easier:
 
 ```sh
 ./run.sh customers

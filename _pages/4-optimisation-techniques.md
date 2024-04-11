@@ -24,7 +24,7 @@ Lazy loading is helpful when you know that you will not use all the related or c
 
 We've used eager loading for the `Customer` and `Address` relationship. In order to configure lazy loading, use `lazy="select"` in the `relationship()` construct. Let's convert it to lazy loading to see what effect it can have when fetching all customers.
 
-##### db/customer.py
+##### marketsvc/db/customer.py
 
 ```py
 class Customer(Base):
@@ -35,7 +35,7 @@ class Customer(Base):
     )  # one to one
 ```
 
-##### db/address.py
+##### marketsvc/db/address.py
 
 ```py
 class Address(Base):
@@ -49,6 +49,8 @@ class Address(Base):
 
 Let's add a `print` statement in `get_customers()` to access the related object, `Address`, for each of our customers within the session.
 
+##### marketsvc/db_accessor.py
+
 ```py
 def get_customers():
     with Session(engine) as session:
@@ -60,6 +62,8 @@ def get_customers():
 
         return customers
 ```
+
+You can run this by using `./run.sh customers`.
 
 ##### SQLAlchemy logs
 
@@ -105,6 +109,8 @@ As a result, eager loading is the right choice for `Customer` and `Address` rela
 
 Let's update the `relationship()` in both `Customer` and `Address` to `lazy="joined"`, and run the request to get the customer information.
 
+Once again, run this by using `./run.sh customers`.
+
 ##### SQLAlchemy logs
 
 ```sql
@@ -133,6 +139,8 @@ You can also use SQL functions including aggregate functions while working with 
 
 Let's use the `SUM()` function to get the total cost of an order in the SQL query itself, rather than querying the individual items prices and summing them up in Python. 
 
+##### marketsvc/db_accessor.py
+
 ```py
 from sqlalchemy.sql import func
 
@@ -144,9 +152,13 @@ def get_total_cost_of_an_order(order_id):
             .join(OrderItems.item)
             .where(Orders.id == order_id)
         )
-        total_cost = result.scalar()
+        return result.scalar()
+```
 
-        return total_cost
+Hit the `/order_total` API by using the shell script with a argument that indicates the `order_id` of the order you wish to get the total of.
+
+```sh
+./run.sh ordertotal 1
 ```
 
 ##### SQLAlchemy logs
@@ -172,7 +184,7 @@ Let us consider the `order_items` table. The `quantity` of an order is defined h
 
 Alternatively, we could introduce a hybrid property that represents the total cost of an item. We can do this with the [`@hybrid_property`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property) decorator.
 
-##### db/order_items.py
+##### marketsvc/db/order_items.py
 
 ```py
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -188,6 +200,8 @@ class OrderItems(Base):
 Here, the `item_total` property returns the product of item's price and the quantity of that item bought. On instances of `OrderItems`, the multiplication occurs in Python.
 
 Thus, in `as_dict()` method of `Orders`, where we return the information of an order, we can directly get the item's total by `order_item.item_total`. This makes it much easier to access the item total.
+
+##### marketsvc/db/orders.py
 
 ```py
 def as_dict(self):
@@ -205,7 +219,7 @@ def as_dict(self):
 
 ### Hybrid Expressions
 
-##### db/order_items.py
+##### marketsvc/db/order_items.py
 
 ```py
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -229,6 +243,8 @@ Above, we've also added an expression modifier to the `item_total` hybrid proper
 
 Consequently, our query to get the total cost of an order becomes even simpler. Here, we have directly accessed the hybrid expression in the query.
 
+##### marketsvc/db_accessor.py
+
 ```py
 def get_total_cost_of_an_order(order_id):
     with Session(engine) as session:
@@ -238,9 +254,7 @@ def get_total_cost_of_an_order(order_id):
             .join(OrderItems.item)
             .where(Orders.id == order_id)
         )
-        total_cost = result.scalar()
-
-        return total_cost
+        return result.scalar()
 ```
 
 `OrderItems.item_total` would be equivalent to `Item.price * OrderItems.quantity` used earlier.

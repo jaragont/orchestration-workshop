@@ -127,7 +127,7 @@ marketsvc-1  |  * Running on http://127.0.0.1:9090
 ```
 
 Our flask app is now ready for requests.
-Let's test it by running the following:
+Let's test it by running the following in a new terminal window:
 
 ```sh
 curl -v http://localhost:9090/
