@@ -18,7 +18,7 @@ As you'd expect, there are two `docker` services: `marketdb` and `marketsvc`.
 
 `marketdb` is the container that runs our `postgres` db.
 
-To use a `postgres` db, we use the [postgres docker image](https://hub.docker.com/_/postgres) which runs a `postgres` instance.
+To use a `postgres` db, we use the [Postgres Docker image](https://hub.docker.com/_/postgres) which runs a `postgres` instance.
 
 ```yaml
 image: postgres
@@ -95,7 +95,7 @@ python -m pip install -r marketsvc/requirements.txt
 
 You will need to repeat this step every time you add a new package to `marketsvc/requirements.txt` to have `Codespaces` recognise it.
 
-To verify that intellisense now works correctly, open up any `.py` file in your project.
+To verify that IntelliSense now works correctly, open up any `.py` file in your project.
 `cmd`+click on any import in your file, you should be taken to the source file of the corresponding module.
 
 ## Running our services
