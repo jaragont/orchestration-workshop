@@ -6,7 +6,7 @@ date: 2024-01-02
 layout: post
 ---
 
-Let's explore the files in `MarketPlace`.
+Let's explore the files in `MarketPlace`. Our application directory is the `marketsvc` folder. Any changes we do in the tutorial, we'll do it within this `marketsvc` folder.
 
 For this project, we'll be using `Docker` to run our `postgres` database and `Python` microservice.
 So let's start at the [`compose.yaml`](https://docs.docker.com/compose/compose-application-model/#:~:text=The%20Compose%20file,prefers%20the%20canonical%20compose.yaml%20.) file.

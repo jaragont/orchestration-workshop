@@ -11,7 +11,7 @@ In this section, we will introduce SQLAlchemy, whose core will act as an abstrac
 
 ## Engine
 
-Let's create `db/base.py` to keep the database connection configuration in one place.
+Let's create `db/base.py` in the `marketsvc` folder to keep the database connection configuration in one place. 
 
 Here we create the [`Engine`](https://docs.sqlalchemy.org/en/20/core/engines.html) object, which is the entry point of any SQLAlchemy application. The `Engine` serves as the main source of DBAPI connections to a given database. 
 
