@@ -30,11 +30,19 @@ After each step, you can refer to the corresponding completed version of the cod
 
 Now, let's get started!
 
-1. Visit (TODO: insert link) and hit the button "Use Template" > "Open in Codespaces". This will open up a copy of the project on `Codespaces` for you.
+1. Visit the [example repo: SQLAlchemy Workshop](https://github.com/rhythm-patel/sqlalchemy-workshop) and hit the button "Use Template" > "Create new repository".
+You will be redirected to a page to create a new repository in your org based on our example repo.
 
-2. From the Source Control tab on the left panel of `Codespaces`, select "Publish Branch"
+![image1](/sqlalchemy-wkshop/assets/gitbook/images/use_template.png)
 
-3. You'll be prompted to name your new repository. Select "public" and name your repository `<YourName>MarketPlace`
+2. Make sure to tick the box `include all branches`, then give your repo a name.
+
+![image2](/sqlalchemy-wkshop/assets/gitbook/images/create_repo.png)
+
+3. Once your repo is created, click on the `Code` menu, and from the `Codespaces` tab, click `Create codespace` on main.
+This will open the code in a `Codespaces` container where we will be incrementally making updates to the code.
+
+![image3](/sqlalchemy-wkshop/assets/gitbook/images/codespaces.png)
 
 ## Useful Extensions
 

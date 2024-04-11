@@ -14,14 +14,14 @@ To begin, checkout the branch [`step-5-asyncio-intro`](https://github.com/aelsay
 git checkout step-5-asyncio-intro
 ```
 
-We'll start at the first file `01-sync_tests.py`.
+We'll start at the first file `01-sync_tasks.py`.
 Open up the file and take a look at the two synchronous python methods in the file.
 There is a `worker()` method, that simulates doing IO-bound work by calling `time.sleep()`.
 The `main()` method calls a `worker()` instance for each of the jobs that need to be done.
 Go ahead and run this file:
 
 ```sh
-python 01-sync_tests.py
+python 01-sync_tasks.py
 ```
 
 As you expect, of course, the workers execute the jobs synchronoushly.
@@ -54,9 +54,9 @@ At a given moment, `asyncio` will run the first `READY` task on the queue:
 
 ## Using Coroutines
 
-Let's turn our methods from `01-sync_tests.py` into coroutines and run them on `asyncio`'s event loop.
+Let's turn our methods from `01-sync_tasks.py` into coroutines and run them on `asyncio`'s event loop.
 
-Open the file `02-async_tests.py`.
+Open the file `02-async_tasks.py`.
 We have turned the `worker()` method into a coroutine using the `async def` keyword.
 We also log the start time and end time of the job execution so we can better understand how long tasks take.
 
@@ -72,7 +72,7 @@ Take a moment to think about the order of lines you expect to be printed to stdo
 Now, let's run the program:
 
 ```sh
-python 02-async_tests.py
+python 02-async_tasks.py
 ```
 
 As you can see, the coroutines executed sequentially. And the tasks took 3s in total.
@@ -153,7 +153,7 @@ execution resumes at L24 and the program terminates.
 > What order do we expect?
 {: .block-tip }
 
-Now, we can go back to `asyncio.gather()` in `02-async_tests.py`.
+Now, we can go back to `asyncio.gather()` in `02-async_tasks.py`.
 It has achieved concurrency by scheduling all the tasks passed to it first, before awaiting them.
 
 ## Task Groups

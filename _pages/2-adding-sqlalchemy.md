@@ -9,6 +9,24 @@ layout: post
 In the last step, we had seen that `db_accessor.py` used `psycopg2`, the PostgreSQL database adapter, to interact with the database.
 In this section, we will introduce SQLAlchemy, whose core will act as an abstraction layer to connect with the PostgresSQL database.
 
+Before we start making any code changes, we need to install `sqlalchemy` from [PyPI](https://pypi.org/).
+In your `marketsvc/requirements.txt`, add `sqlalchemy`:
+
+```txt
+flask
+psycopg2
+sqlalchemy
+ruff
+```
+
+Since we've added a dependency, we need to rebuild the docker container so it can install the added dependency on our `marketsvc` container:
+
+```sh
+docker compose build
+```
+
+Now, we're ready to start making code changes.
+
 ## Engine
 
 Let's create `db/base.py` in the `marketsvc` folder to keep the database connection configuration in one place. 

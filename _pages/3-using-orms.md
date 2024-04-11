@@ -57,7 +57,7 @@ We declare the columns by adding them as attributes along with a special type ca
 
 For example: `name: Mapped[str]` is the `name` column of the `customer` table of datatype `VARCHAR`. Consequently, we can indicate nullable contraints in the column by `Mapped[str | None]`.
 
-To include additional specification for our attributes, we can use the [`mapped_column()`](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.mapped_column) construct, which will generate `Column` objects. We can use `mapped_column()` without annotations too. The following exampe is also valid.
+To include additional specification for our attributes, we can use the [`mapped_column()`](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.mapped_column) construct, which will generate `Column` objects. We can use `mapped_column()` without annotations too. The following example is also valid.
 
 ```py
 customer_name = mapped_column("name", String, nullable=False)
