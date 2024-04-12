@@ -6,7 +6,8 @@ date: 2024-01-05
 layout: post
 ---
 
-Let's talk about some techniques that will help to optimise your code when using ORMs with SQLAlchemy. You can checkout the `step-3-orms` branch to follow along this interactive section.
+Let's talk about some techniques that will help to optimise your code when using ORMs with SQLAlchemy.
+You can checkout the `step-3-orms` branch to follow along this interactive section.
 
 ## Relationship Loading Techniques
 
@@ -84,28 +85,39 @@ Here, the first **SELECT** statement only fetches the attributes linked to `Cust
 
 > ##### What if?
 >
-> What happens if there are 100 customers? What about 1000? Or, what if we have 100,000 customers? Some real world services have millions of customers. How many **SELECT** statements would be emitted to fetch customer and address information?
+> What happens if there are 100 customers? What about 1000? Or, what if we have 100,000 customers?
+> Some real world services have millions of customers.
+> How many **SELECT** statements would be emitted to fetch customer and address information?
 {: .block-warning }
 
-This is popular problem known as the **N+1 problem**. Initially, one **SELECT** statement is emitted to loads the result collection of parent objects. Then, for each parent object, an additional **SELECT** is emitted to load attributes of each related child object. Consequently, for N parent objects, we would have **N + 1 SELECT** statements.
+This is a well-known problem known as the **N+1 problem**.
+Initially, one **SELECT** statement is emitted to loads the result collection of parent objects.
+Then, for each parent object, an additional **SELECT** is emitted to load attributes of each related child object.
+Consequently, for N parent objects, we would have **N + 1 SELECT** statements.
 
 > ##### Test Your Understanding
 >
-> For this scenario to fetch customer information, we require the `Address` information of all customers. Lazy loading is not a good strategy here. It becomes beneficial when we know we wouldn't be needing all the child objects. Is there a place in our service where lazy loading might be helpful?
+> For this scenario to fetch customer information, we require the `Address` information of all customers.
+> Lazy loading is not a good strategy here.
+> It becomes beneficial when we know we wouldn't be needing all the child objects.
+> Is there a place in our service where lazy loading might be helpful?
 {: .block-tip }
-
 
 ### Eager Loading
 
-We can fix the N+1 problem by using **eager loading**. It refers when the related objects are loaded with the parent object up front. The child objects are automatically loaded along with its parent object.
+We can fix the N+1 problem by using **eager loading**.
+It refers when the related objects are loaded with the parent object up front.
+The child objects are automatically loaded along with its parent object.
 
 The ORM accomplishes this by consolidating a **JOIN** to the **SELECT** statement to load the related objects at simultaneously, or by emitting additional **SELECT** statements to load the related child objects.
 
-Eager loading is advantageous when we want to fetch information about all or numerous child objects along with its parent object. It's also a good practice to use this to reduce further queries and alleviate further load to the database.
+Eager loading is advantageous when we want to fetch information about all or numerous child objects along with its parent object.
+It's also a good practice to use this to reduce further queries and alleviate further load to the database.
 
 As a result, eager loading is the right choice for `Customer` and `Address` relationship.
 
-[Joined Eager Loading](https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html#joined-eager-loading) is the most prominent type of eager loading. It applies a **JOIN** to the given **SELECT** statement to that related objects are loaded in the same result.
+[Joined Eager Loading](https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html#joined-eager-loading) is the most prominent type of eager loading.
+It applies a **JOIN** to the given **SELECT** statement to that related objects are loaded in the same result.
 
 Let's update the `relationship()` in both `Customer` and `Address` to `lazy="joined"`, and run the request to get the customer information.
 
@@ -121,28 +133,34 @@ FROM customer LEFT OUTER JOIN address AS address_1 ON address_1.id = customer.ad
 ROLLBACK
 ```
 
-Here, you can see how we only emit 1 query to the database. The query has a **JOIN** to join the two tables and fetch all related information at once. We've also successfully avoided the N+1 problem.
+Here, you can see how we only emit 1 query to the database.
+The query has a **JOIN** to join the two tables and fetch all related information at once.
+We've also successfully avoided the N+1 problem.
 
 ### No Loading
 
-No loading means to disable loading on a relationship. The child object is empty and is never loaded, or an error is raised with its accessed. No loading is used to prevent unwanted lazy loads. You can trigger this with the [`lazy="raise"`](https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html#prevent-lazy-with-raiseload) parameter.
+No loading means to disable loading on a relationship.
+The child object is empty and is never loaded, or an error is raised with its accessed. No loading is used to prevent unwanted lazy loads.
+You can trigger this with the [`lazy="raise"`](https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html#prevent-lazy-with-raiseload) parameter.
 
 > ##### Try It Yourself
 >
-> There are more [relationship loading techniques](https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html), but the ones described above are the most popular. Try experimenting with different queries yourself and see the generated SQL statements in the logs.
+> There are more [relationship loading techniques](https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html), but the ones described above are the most popular.
+> Try experimenting with different queries yourself and see the generated SQL statements in the logs.
 {: .block-tip }
-
 
 ## SQL Functions
 
 You can also use SQL functions including aggregate functions while working with ORMs. We can create [`Function`](https://docs.sqlalchemy.org/en/20/core/functions.html#sqlalchemy.sql.functions.Function) objects by using the [`func`](https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.func) object, which acts as a factory.
 
-Let's use the `SUM()` function to get the total cost of an order in the SQL query itself, rather than querying the individual items prices and summing them up in Python. 
+Let's use the `SUM()` function to get the total cost of an order in the SQL query itself, rather than querying the individual items prices and summing them up in Python.
 
 ##### marketsvc/db_accessor.py
 
 ```py
 from sqlalchemy.sql import func
+
+...
 
 def get_total_cost_of_an_order(order_id):
     with Session(engine) as session:
@@ -155,7 +173,7 @@ def get_total_cost_of_an_order(order_id):
         return result.scalar()
 ```
 
-Hit the `/order_total` API by using the shell script with a argument that indicates the `order_id` of the order you wish to get the total of.
+Hit the `/api/order_total` endpoint by using the shell script with a argument that indicates the `order_id` of the order you wish to get the total of.
 
 ```sh
 ./run.sh ordertotal 1
@@ -180,9 +198,12 @@ Here, we're directly using the `SUM()` aggregate function and returning a single
 
 ### Hybrid Properties
 
-Let us consider the `order_items` table. The `quantity` of an order is defined here and the `price` of an item is defined in the `items` table. Whenever we want to get the total cost of an item, we have to multiply item price and quantity for each item in the order. 
+Let us consider the `order_items` table.
+The `quantity` of an order is defined here and the `price` of an item is defined in the `items` table.
+Whenever we want to get the total cost of an item, we have to multiply item price and quantity for each item in the order.
 
-Alternatively, we could introduce a hybrid property that represents the total cost of an item. We can do this with the [`@hybrid_property`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property) decorator.
+Alternatively, we could introduce a hybrid property that represents the total cost of an item.
+We can do this with the [`@hybrid_property`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property) decorator.
 
 ##### marketsvc/db/order_items.py
 
@@ -219,6 +240,9 @@ def as_dict(self):
 
 ### Hybrid Expressions
 
+To use hybrid attributes in the SQL query, we need to use the [`hybrid_property.expression()`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property.expression) modifier.
+This is because its SQL expression must be differentiated from the Python expression.
+
 ##### marketsvc/db/order_items.py
 
 ```py
@@ -237,9 +261,8 @@ class OrderItems(Base):
         return Item.price * cls.quantity
 ```
 
-To use hybrid attributes in the SQL query, we need to use the [`hybrid_property.expression()`](https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property.expression) modifier. This is because its SQL expression must be differentiated from the Python expression.
-
-Above, we've also added an expression modifier to the `item_total` hybrid property. Notice how this function is a class method and operates on the `OrderItems` and `Item` classes, similar to how we might do in the `select()` query.
+Above, we've also added an expression modifier to the `item_total` hybrid property.
+Notice how this function is a class method and operates on the `OrderItems` and `Item` classes, similar to how we might do in the `select()` query.
 
 Consequently, our query to get the total cost of an order becomes even simpler. Here, we have directly accessed the hybrid expression in the query.
 
@@ -263,7 +286,8 @@ You might notice hybrid properties are similar to Python's `@property` decorator
 
 &nbsp;
 
-We now have explored some ways how we can optimise our code using ORMs. There are many more techniques that would be hard to cover in a short span of time. What we've discussed about SQLAlchemy is just the tip of the iceberg. Feel free to browse the SQLAlchemy [documentation](https://docs.sqlalchemy.org/en/20/index.html) to find ways to make your life easier!
+We now have explored some ways how we can optimise our code using ORMs. There are many more techniques that would be hard to cover in a short span of time.
+What we've discussed about SQLAlchemy is just the tip of the iceberg. Feel free to browse the SQLAlchemy [documentation](https://docs.sqlalchemy.org/en/20/index.html) to find ways to make your life easier!
 
 Having said that, let's switch gears and look at asyncio, and how we can utilise it in our service.
 

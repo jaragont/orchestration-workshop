@@ -264,7 +264,7 @@ def customers():
     return jsonify(response)
 ```
 
-You may now hit the API with:
+You may now hit the endpoint with:
 
 ```sh
 ./run.sh customers
