@@ -17,12 +17,12 @@ git checkout step-7-asyncio-orms-base
 
 This essentially builds on the work we've done in `step-3-orms` but uses the async engine we added in the previous step.
 
-So in this step, we'll learn how to use the async version of SQL Query expression language we learned about in `step-3-orms`.
-
-To do this, we'll use [`AsyncSession`](https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncSession).
+To start, we'll need to use an [`AsyncSession`](https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncSession).
 Since we [need a dedicated session per connection](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#using-asyncsession-with-concurrent-tasks), we'll use a factory to create our `AsyncSession`s.
 
 To do this, we'll start in `db/base.py` add the following imports:
+
+##### marketsvc/db/base.py
 
 ```py
 from sqlalchemy.ext.asyncio import (
@@ -42,6 +42,8 @@ async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 This returns an `AsyncSession` object that we can use in `db_accessor.py`.
 
 Finally, we need to update our `Base` class to use the `AsyncAttrs` mixin:
+
+##### marketsvc/db/base.py
 
 ```py
 class Base(AsyncAttrs, DeclarativeBase):
@@ -74,7 +76,6 @@ We elected to use `expire_on_commit=False` so we can access queried objects afte
 > See [this link](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#using-asyncsession-with-concurrent-tasks) for more info.
 {: .block-warning }
 
-
 ## Updating the DB Queries
 
 Now we are ready to update our queries.
@@ -82,6 +83,8 @@ Now we are ready to update our queries.
 Let's start with `get_customers()`.
 
 First, we replace the `Session` with an `AsyncSession`:
+
+##### marketsvc/db_accessor.py
 
 ```py
 async def get_customers():
@@ -92,6 +95,8 @@ async def get_customers():
 Using the session's context manager means we do not have to explicitly call `session.close()` when we are done.
 
 Next, since we want to stream one customer object at a time rather query them all at once, we'll use the `stream_scalars()` API:
+
+##### marketsvc/db_accessor.py
 
 ```py
     async with async_session_maker() as session:
@@ -107,9 +112,10 @@ Next, since we want to stream one customer object at a time rather query them al
 > _HINT_: what type of loading is used for `address` in the `Customer` ORM class?
 {: .block-tip }
 
-
 Next, let's update `get_total_cost_of_an_order()`.
 As we don't need to stream a series of results here, all we need to do is just use the `async` version of the session and `await` the `execute` statement:
+
+##### marketsvc/db_accessor.py
 
 ```py
 async def get_total_cost_of_an_order(order_id):
@@ -130,6 +136,8 @@ What operations do you think we need to `await` here?
 - `session.execute()`
 - `session.add()`
 - `session.commit()`
+
+##### marketsvc/db_accessor.py
 
 ```py
 async def add_new_order_for_customer(customer_id, items):
