@@ -22,7 +22,7 @@ Do not worry about installing them, we'll be installing the required tools when 
 
 ## Creating your Project
 
-Throughout this workshop, we'll be using an example project `Marketplace` (TODO: insert link).
+Throughout this workshop, we'll be using an [example project `Marketplace`](https://github.com/rhythm-patel/sqlalchemy-workshop).
 It is a simple micro-service that manages a `postgres` database of orders and customers.
 The micro-service currently uses raw SQL to manage the database, we'll be incrementally working on it to replace the raw SQL with SQLAlchemy, make use of ORMs and optimise our access patterns.
 
@@ -33,16 +33,16 @@ Now, let's get started!
 1. Visit the [example repo](https://github.com/rhythm-patel/sqlalchemy-workshop) and hit the button "Use Template" > "Create new repository".
 You will be redirected to a page to create a new repository in your org based on our example repo.
 
-![image1](/sqlalchemy-wkshop/assets/gitbook/images/use_template.png)
+    ![image1](/sqlalchemy-wkshop/assets/gitbook/images/use_template.png)
 
 2. Make sure to tick the box `include all branches`, then give your repo a name.
 
-![image2](/sqlalchemy-wkshop/assets/gitbook/images/create_repo.png)
+    ![image2](/sqlalchemy-wkshop/assets/gitbook/images/create_repo.png)
 
 3. Once your repo is created, click on the `Code` menu, and from the `Codespaces` tab, click `Create codespace` on main.
 This will open the code in a `Codespaces` container where we will be incrementally making updates to the code.
 
-![image3](/sqlalchemy-wkshop/assets/gitbook/images/codespaces.png)
+    ![image3](/sqlalchemy-wkshop/assets/gitbook/images/codespaces.png)
 
 ## Useful Extensions
 
@@ -52,9 +52,8 @@ In this tutorial, two useful VS Code extensions will make your development exper
 
 2. The [Docker extension](https://code.visualstudio.com/docs/containers/overview#_installation)
 
-To install them, find the Extensions tab in the left panel of `Codespaces`, and search for each of the extensions.
-They are both provided by Microsoft.
-Hit "install" to install them.
+Find the Extensions tab in the left panel of `Codespaces`, and for each extension, search for it by name. Then hit the install button.
+Both extensions are provided by Microsoft.
 
 ## Creating a virtual environment
 

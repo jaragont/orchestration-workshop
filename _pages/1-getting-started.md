@@ -6,7 +6,9 @@ date: 2024-01-02
 layout: post
 ---
 
-Let's explore the files in `Marketplace`. Our application directory is the `marketsvc` folder. Any changes we do in the tutorial, we'll do it within this `marketsvc` folder.
+Let's explore the files in `Marketplace`.
+Our Python application directory is `marketsvc/`.
+All the changes we'll be making in this tutorial will be in the `marketsvc/` folder.
 
 For this project, we'll be using `Docker` to run our `postgres` database and `Python` microservice.
 So let's start at the [`compose.yaml`](https://docs.docker.com/compose/compose-application-model/#:~:text=The%20Compose%20file,prefers%20the%20canonical%20compose.yaml%20.) file.
@@ -112,7 +114,13 @@ This tells `docker` to build the containers defined in the `compose.yaml` file.
 When it's done building, run the following:
 
 ```sh
-docker compose up
+docker compose run -p 9090:9090 marketsvc
+```
+
+or you can use the convenience shell script `run.sh` to run the same command:
+
+```sh
+./run.sh run
 ```
 
 This brings up our two containers.
@@ -120,7 +128,7 @@ In a moment, you should be able to see through the logs that `marketdb` has star
 
 > _HINT:_ you can also use Codespaces' `Docker` extension to see which containers are running and whether they are healthy.
 
-`marketsvc` should print something like this once it's ready:
+`marketsvc` should log a message like this once it's ready:
 
 ```sh
 marketsvc-1  |  * Running on http://127.0.0.1:9090
@@ -144,5 +152,12 @@ curl http://localhost:9090/api/orders?cust_id=1
 
 This should return a list of items in all of customer 1's orders.
 Now that we understand the codebase, it's time to start with SQLAlchemy!
+
+> ##### Tip
+>
+> Instead of writing out `curl` commands manually, we have provided a quick shell script for you `run.sh`.
+> Take a look at its contents to see all the supported commands.
+> For example, the curl command above can be run by running: `./run.sh custorders`
+{: .block-tip }
 
 &nbsp;
