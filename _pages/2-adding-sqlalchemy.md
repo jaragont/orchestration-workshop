@@ -170,7 +170,7 @@ We can then send the actual value of these parameters as a dictionary in the sec
 conn.execute(
             text("SELECT * FROM customer WHERE id=:customer_id"),
             {"customer_id": 1},
-        )
+)
 ```
 
 > ##### WARNING
@@ -239,7 +239,7 @@ We can then call `conn.commit()` for committing additional statements. This styl
 However, if an exception occurs duing the transaction, the changes will be rolled back and a **ROLLBACK** will be displayed instead.
 
 We also want to insert the order items into the `order_items` table, and associate them with the `new_order_id` we just created.
-To do that, we need another INSERT query that inserts a set of rows.
+To do that, we need another `INSERT` query that inserts a set of rows using a list of dictionaries as bound parameters.
 Putting both insert queries together, your function should now look like this:
 
 ```py
@@ -284,7 +284,7 @@ def add_new_order_for_customer(customer_id, items):
 
 > ##### Test Your Understanding
 >
-> Use the `execute_insert_query()` function in `add_new_order_for_customer()` to add multiple rows to the `order_items` table by using a list of dictionaries in the bound parameters. Can you predict the resulting SQLAlchemy logs when the method is called?
+> Here, we've used the `execute_insert_query()` to add multiple rows to `order_items` table. Can you predict the resulting SQLAlchemy logs when `add_new_order_for_customer()` is called?
 {: .block-tip }
 
 Once you've implemented this, you can hit the `add_new_order` API to add an order.
