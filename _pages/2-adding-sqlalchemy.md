@@ -36,6 +36,15 @@ docker compose build
 
 Now, we're ready to start making code changes.
 
+> ##### TIP
+>
+> If you're using the `Python` Codespaces extension, you also want to install the new dependency `sqlalchemy` in your local `venv`, so that the `Python` extension can recognise it.
+> Assuming your `venv` is activated, run:
+> ```sh
+> python -m pip install -r marketsvc/requirements.txt
+> ```
+{: .block-tip }
+
 ## Engine
 
 Let's create `db/base.py` in the `marketsvc` folder to keep the database connection configuration in one place.

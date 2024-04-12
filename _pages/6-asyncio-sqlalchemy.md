@@ -15,69 +15,137 @@ git checkout step-6-asyncio-sqlalchemy-base
 ```
 
 This is an async version of the service we saw in `main`.
-Except it uses the the [`async` flavour of `Flask`](https://flask.palletsprojects.com/en/3.0.x/async-await/) and the [postgres async package `asyncpg`](https://magicstack.github.io/asyncpg/current/).
+It uses the the [`async` flavour of `Flask`](https://flask.palletsprojects.com/en/3.0.x/async-await/) and the [postgres async package `asyncpg`](https://magicstack.github.io/asyncpg/current/).
 
-Since we've installed new packages, let's add them to our `venv` so we can get intellisense for these packages.
+Since we've installed new packages, we need to rebuild our docker container:
 
 ```sh
-python -m pip install -r marketsvc/requirements.txt
+docker compose down
+docker compose build
 ```
 
-Now, let's read through a few key files.
+> ##### TIP
+>
+> If you're using the `Python` Codespaces extension, you also want to install the new dependencies in your local `venv`, so that the `Python` extension can recognise it.
+> Assuming your `venv` is activated, run:
+> ```sh
+> python -m pip install -r marketsvc/requirements.txt
+> ```
+{: .block-tip }
 
-### server.py
+Now, let's read through a few differences between the sync and async versions.
 
-You'll notice here a number of requests that have an async implementation use the keyword `async`.
+### db_accessor.py
 
-For requests where we anticipate a potentially large number of items to be returned, an async generator was used in the implementation.
-For example, in `/api/customers`, `get_customers()` returns an async generator from via `stream_query()` that we then consume to return a response.
-In a real life example, you may want to opt for a multi-part response to your request so that you don't have to load all the contents in memory at once.
+You'll notice here the implementations of the functions that execute queries has changed to use `asyncpg`.
+With `asyncpg`, we can `await` the I/O interactions with the database so that the blocked coroutine can give a chance to other tasks to execute while it waits for the database interaction to complete.
 
-For requests that don't require large amounts of data to be loaded in memory, like `/api/order_total`, we simply `await` the async version of the implementation, before we return the response.
+This means that we need to define these functions as coroutines; we achieve that by using `async def`.
+
+#### Async Context Managers
+
+Our execute query functions can now make use of async features like `async with`, a keyword that allows us to use asynchronous context managers.
+
+As you may expect, `async with` is the async version of the `with` keyword.
+Parallel to it's sync counterpart, using an async context manager allows you to invoke `__aenter__()` and `__aexit__()` for of your managed object.
+Unlike the sync version, `__aenter__()` and `__aexit__()` are awaited.
+This allows other tasks to execute while your task waits for the (potentially I/O bound) setup and cleanup of your managed object.
+
+Let's look at `execute_insert_query()` in our code as an example.
+`__aenter__()` of `Connection.transaction()` starts a database transaction that can be rolled back in case of an exception, and `__aenter__()` calls `Connection.commit()` and ends the transaction:
+
+##### marketsvc/db_accessor.py
+
+```py
+async def execute_insert_query(query, params):
+conn = await asyncpg.connect(**DB_CONFIG)
+async with conn.transaction():
+    result = conn.cursor(query, params)
+    return result
+```
+
+#### Stream Queries
+
+We've learned about `async for` and asynchronous generators in the previous step.
+Here, we made use of async generators to implement stream queries.
+
+There are broadly two categories of `async` queries we've used to fetch data in this service.
+The first is a regular SELECT query that awaits the execution of the query then returns the resulting rows:
+
+##### marketsvc/db_accessor.py
+
+```py
+async def execute_query(query, *params):
+    conn = await asyncpg.connect(**DB_CONFIG)
+    async with conn.transaction():
+        return await conn.fetch(query, *params)
+```
+
+This is suitable for a query like `get_total_cost_of_an_order()` since we only expect one row as a result, respresenting the total cost.
+
+The second allows us to stream results one at a time from the database.
+This is useful for requests where we anticipate a large number of items to be fetched from the database, we can make use of async generators to load just one object at a time in memory.
+
+##### marketsvc/db_accessor.py
+
+```py
+async def stream_query(query, *params):
+    conn = await asyncpg.connect(**DB_CONFIG)
+    async with conn.transaction():
+        async for row in conn.cursor(query, *params):
+            yield row
+```
+
+For example, in `/api/customers`, we can potentially have a huge number of customers.
+So `get_customers()` calls `stream_query()` and returns its async generator that we can then consume from, in `server.py` to return a response.
+
+In a real life example, this is helpful because you can then perform an aggregation on one object at a time without having to load all objects in memory at once to perform your aggregation.
+
+#### Task Groups
 
 You'll also notice, there's a new request `/api/orders_total` which calculates the total cost of a list of given order ids.
 This request exercises `asyncio.TaskGroup()` which we've learned about in the previous step.
 It kicks off a number of concurrent tasks `get_total_cost_of_an_order()` for each order.
 When they are done, it returns a list of the results of all the tasks.
 
+What happens if one of the queries raises an exception?
+
 > _NOTE_
 >
-> While `/api/orders_total` can be implemented more efficiently using a single SQL query.
-> We are using this as an example of `TaskGroup()`.
+> While `/api/orders_total` can be implemented more efficiently using a single SQL query, we are using it as a way to allow you to exercise `TaskGroup()`.
 > In a real life example, you will have other tasks to perform where you can truly benefit from concurrency.
 
+### server.py
 
-### db_accessor.py
+Finally, let's take a look at `server.py`.
+You'll notice here that request handler functions with an async implementation now use the `async` keyword.
 
-Let's start by looking at `get_customers()`.
-As we saw in `server.py`, we expect an async generator here, so how do we achieve that?
+For requests that don't require large amounts of data to be loaded in memory, like `/api/order_total`, we simply `await` the async version of the implementation, before we return the response.
 
-Look at the implementation of `stream_query()`.
-You'll notice that we've used `asyncpg`'s [`conn.cursor()`](https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.connection.Connection.cursor) here, which is compatible with the `async for` syntax.
-We then yield one dictionary row at a time, which is what we end up sending as a json response.
+But what happens in the case of requests like `/api/customers` where we used an async generator?
+As we saw in `db_accessor.py`, `get_customers()` is not a coroutine itself.
+But it returns an async generator.
+
+So in `server.py`, we can use list comprehension using the `async for` syntax to create our final list.
 
 > ##### Test Your Understanding
 >
-> Why is `get_customers()` a regular method not an `async` one?
+> With the current implementation of the `/api/customers`, what is the memory footprint?
 {: .block-tip }
 
-In contrast, let's look at `get_total_cost_of_an_order()`.
-Since we just expect a single number here as a response, we await `execute_query()`, which is implemented using `asyncpg`'s [`conn.fetch()`](https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.connection.Connection.fetch) interface.
-We simply await the query execution and return the sum.
-While this on it's own is not a very useful async request, it becomes useful when you want to perform multiple concurrent actions, like in `/api/orders_total`.
-
-Feel free to stop here and run the service:
+Feel free to stop here and play around with the service:
 
 ```sh
-docker compose build
-docker compose up
+./run.sh run
 ```
 
 ## Adding SQLAlchemy
 
 We now want to replace the vanilla `asyncpg` library with `SQLAlchemy` so we can get the same benefits we got with our sync service.
 
-First, we'll add back `sqlalchemy` to our requirements.txt:
+First, we'll add back `sqlalchemy` to our `requirements.txt`:
+
+##### marketsvc/requirements.txt
 
 ```txt
 flask[async]
@@ -85,8 +153,12 @@ asyncpg
 sqlalchemy
 ```
 
+### The Async Engine
+
 Next, we want to create an async SQLAlchemy engine.
 Like we did in step 3, create a new file `marketsvc/db/base.py` with the following contents:
+
+##### marketsvc/db/base.py
 
 ```py
 import os
@@ -109,14 +181,19 @@ engine = create_async_engine(url_object, poolclass=NullPool, echo=True)
 Do these steps look familiar?
 There are two key differences here:
 
-1. the dialect of postgres in the `URL` object is now `asyncpg`, so we use `"postgresql+asyncpg"`.
-2. we now use `create_async_engine()` to create an [`AsyncEngine`](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncEngine).
+1. The dialect of postgres in the `URL` object is now `asyncpg`, so we use `"postgresql+asyncpg"`.
+2. We now use `create_async_engine()` to create an [`AsyncEngine`](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncEngine).
     - `echo=True` enables log output.
-    - `poolclass=NullPool` allows the same `engine` instance to be [reused across multiple event loops](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#using-multiple-asyncio-event-loops). This is needed because of [the way flask implements it's async requests](https://flask.palletsprojects.com/en/3.0.x/async-await/#performance).
+    - `poolclass=NullPool` allows the same `engine` instance to be [reused across multiple event loops](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#using-multiple-asyncio-event-loops).
+    This is needed because of [the way flask implements it's async requests](https://flask.palletsprojects.com/en/3.0.x/async-await/#performance).
+
+### Executing Queries
 
 Next, we'll update the functions that execute our queries to use SQLAlchemy.
 
 For `execute_query()`, update it to the following:
+
+##### marketsvc/db_accessor.py
 
 ```py
 async def execute_query(query, params=None):
@@ -126,11 +203,14 @@ async def execute_query(query, params=None):
 
 What does this mean?
 
-[`AsyncEngine.begin()`](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncEngine.begin) is a useful context manager which, on `__enter__()`, delivers an `AsyncConnection` with an `AsyncTransaction` established.
-This means that we need not explicitly call `conn.commit()` or `conn.close()` as the context manager takes care of that for us.
-All that's left to do then is to await the execution of the statement, and return the results in the desired format.
+[`AsyncEngine.begin()`](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncEngine.begin) is a useful context manager which, on `__aenter__()`, delivers an `AsyncConnection` with an `AsyncTransaction` established.
+On `__aexit__()`, it commits the transaction and closes the connection.
+This means that we do not need to explicitly call `conn.commit()` or `conn.close()`.
+All that's left to do then is to `await` the execution of the statement, and return the results in the desired format.
 
 For `execute_insert_query()`, update it to the following:
+
+##### marketsvc/db_accessor.py
 
 ```py
 async def execute_insert_query(query, params):
@@ -140,7 +220,14 @@ async def execute_insert_query(query, params):
         return result
 ```
 
-Finally, for `stream_query()`, we'll use [`AsyncConnection.stream()`](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncConnection.stream) which allows us to asyncronoushly loop over the results:
+> ##### Test Your Understanding
+>
+> Have you spotted a redundant line in `execute_insert_query()`?
+{: .block-tip }
+
+Finally, for `stream_query()`, we'll use [`AsyncConnection.stream()`](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncConnection.stream) which allows us to load one `AsyncResult` at a time in memory, and asyncronoushly loop over the results:
+
+##### marketsvc/db_accessor.py
 
 ```py
 async def stream_query(query, params=None):
@@ -151,9 +238,35 @@ async def stream_query(query, params=None):
 ```
 
 Now that we've updated the query execution functions, we just need to update the SQL queries to use the syntax expected by SQLAlchemy as we've done in `step-2-sqlalchemy`.
+
+For example, `get_total_cost_of_an_order()` will look like this:
+
+##### marketsvc/db_accessor.py
+
+```py
+async def get_total_cost_of_an_order(order_id):
+    result = await execute_insert_query(
+        """
+        SELECT 
+            SUM(item.price*order_items.quantity) AS total
+        FROM orders 
+        JOIN order_items 
+        ON 
+            order_items.order_id = orders.id 
+        JOIN item 
+        ON 
+            item.id = order_items.item_id
+        WHERE
+            orders.id=:order_id
+        """,
+        {"order_id": order_id},
+    )
+    return result.one().total
+```
+
 Alternatively, you can just checkout `step-6-asyncio-sqlalchemy-solved`.
 
-Run the service, and play around with it.
+Now, we are ready to run the service and play around with it.
 
 
 > ##### Kudos!
