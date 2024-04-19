@@ -402,7 +402,7 @@ The first **SELECT** statement is to fetch the existing customer with the given 
 &nbsp;
 
 We have not only introduced ORMs that represent tables with classes, but also removed raw SQL text and made querying and inserting data much easier.
-In the next section, we'll take a look at some optimizations and make our codebase even better!
+In the next section, we'll take a look at some optimisations and make our codebase even better!
 
 > ##### Kudos!
 >
