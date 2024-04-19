@@ -86,12 +86,12 @@ Here, the first **SELECT** statement only fetches the attributes linked to `Cust
 > ##### What if?
 >
 > What happens if there are 100 customers? What about 1000? Or, what if we have 100,000 customers?
-> Some real world services have millions of customers.
+> Some real world applications have millions of customers.
 > How many **SELECT** statements would be emitted to fetch customer and address information?
 {: .block-warning }
 
 This is a well-known problem known as the **N+1 problem**.
-Initially, one **SELECT** statement is emitted to loads the result collection of parent objects.
+Initially, one **SELECT** statement is emitted to load the result collection of parent objects.
 Then, for each parent object, an additional **SELECT** is emitted to load attributes of each related child object.
 Consequently, for N parent objects, we would have **N + 1 SELECT** statements.
 
@@ -105,8 +105,7 @@ Consequently, for N parent objects, we would have **N + 1 SELECT** statements.
 
 ### Eager Loading
 
-We can fix the N+1 problem by using **eager loading**.
-It refers when the related objects are loaded with the parent object up front.
+We can fix the N+1 problem by using **eager loading**, where the related objects are loaded with the parent object up front.
 The child objects are automatically loaded along with its parent object.
 
 The ORM accomplishes this by consolidating a **JOIN** to the **SELECT** statement to load the related objects at simultaneously, or by emitting additional **SELECT** statements to load the related child objects.
@@ -119,7 +118,7 @@ As a result, eager loading is the right choice for `Customer` and `Address` rela
 [Joined Eager Loading](https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html#joined-eager-loading) is the most prominent type of eager loading.
 It applies a **JOIN** to the given **SELECT** statement to that related objects are loaded in the same result.
 
-Let's update the `relationship()` in both `Customer` and `Address` to `lazy="joined"`, and run the request to get the customer information.
+Let's update `relationship()` in both `Customer` and `Address` to `lazy="joined"`, and run the request to get the customer information.
 
 Once again, run this by using `./run.sh customers`.
 
@@ -133,7 +132,7 @@ FROM customer LEFT OUTER JOIN address AS address_1 ON address_1.id = customer.ad
 ROLLBACK
 ```
 
-Here, you can see how we only emit 1 query to the database.
+Here, you can see how we only emit **1** query to the database.
 The query has a **JOIN** to join the two tables and fetch all related information at once.
 We've also successfully avoided the N+1 problem.
 
@@ -153,7 +152,7 @@ You can trigger this with the [`lazy="raise"`](https://docs.sqlalchemy.org/en/20
 
 You can also use SQL functions including aggregate functions while working with ORMs. We can create [`Function`](https://docs.sqlalchemy.org/en/20/core/functions.html#sqlalchemy.sql.functions.Function) objects by using the [`func`](https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.func) object, which acts as a factory.
 
-Let's use the `SUM()` function to get the total cost of an order in the SQL query itself, rather than querying the individual items prices and summing them up in Python.
+Let's use the `SUM()` function to get the total cost of an order in the SQL query itself, rather than querying the individual item prices and summing them up in Python.
 
 ##### marketsvc/db_accessor.py
 
