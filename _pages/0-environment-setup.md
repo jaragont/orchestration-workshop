@@ -35,12 +35,12 @@ You will be redirected to a page to create a new repository in your org based on
 
     ![image1](/sqlalchemy-wkshop/assets/gitbook/images/use_template.png)
 
-2. Make sure to tick the box `include all branches`, then give your repo a name.
+2. **Make sure to tick the box `include all branches`**, then give your repo a name.
 
     ![image2](/sqlalchemy-wkshop/assets/gitbook/images/create_repo.png)
 
-3. Once your repo is created, click on the `Code` menu, and from the `Codespaces` tab, click `Create codespace` on main.
-This will open the code in a `Codespaces` container where we will be incrementally making updates to the code.
+3. Once your repo is created, click on the `Code` menu, and from the `Codespaces` tab, click `Create codespace on main`.
+This will open the code in GitHub `Codespaces` where we will be incrementally making updates to the code.
 
     ![image3](/sqlalchemy-wkshop/assets/gitbook/images/codespaces.png)
 
@@ -57,7 +57,7 @@ Both extensions are provided by Microsoft.
 
 ## Creating a virtual environment
 
-To get [intelliSense](https://code.visualstudio.com/docs/editor/intellisense) working, we'll be installing the Python dependencies we use in a Python virtual environment (`venv`).
+To get [IntelliSense](https://code.visualstudio.com/docs/editor/intellisense) working, we'll be installing our Python dependencies in a Python virtual environment (`venv`).
 Then, we'll point the `Python` extension to our `venv` Python path so that `Codespaces` can recognise the modules we use in our code.
 
 1. In the previous section, you should have installed the `Python` extension.
