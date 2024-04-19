@@ -98,7 +98,7 @@ python -m pip install -r marketsvc/requirements.txt
 You will need to repeat this step every time you add a new package to `marketsvc/requirements.txt` to have `Codespaces` recognise it.
 
 To verify that IntelliSense now works correctly, open up any `.py` file in your project.
-`cmd`+click on any import in your file, you should be taken to the source file of the corresponding module.
+`cmd`+click or `Ctrl`+click on any import in your file, you should be taken to the source file of the corresponding module.
 
 ## Running our services
 
