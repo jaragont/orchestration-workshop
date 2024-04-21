@@ -168,8 +168,8 @@ We can then send the actual value of these parameters as a dictionary in the sec
 
 ```py
 conn.execute(
-            text("SELECT * FROM customer WHERE id=:customer_id"),
-            {"customer_id": 1},
+    text("SELECT * FROM customer WHERE id=:customer_id"),
+    {"customer_id": 1},
 )
 ```
 
