@@ -296,7 +296,7 @@ To make this easier, you can use the following command:
 
 > ##### Test Your Understanding
 >
-> Now that you understand paramter binding, go ahead and update the rest of the functions in `db_accessor.py`.
+> With your knowledge of paramter binding, go ahead and update the rest of the functions in `db_accessor.py`.
 > Test them out and observe the logs by SQLAlchemy.
 > Do the logs match your expectations?
 {: .block-tip }
