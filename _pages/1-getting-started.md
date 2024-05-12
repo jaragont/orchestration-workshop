@@ -6,115 +6,76 @@ date: 2024-01-02
 layout: post
 ---
 
+## Overview
+
 Let's explore the files in `Marketplace`.
 Our Python application directory is `marketsvc/`.
 All the changes we'll be making in this tutorial will be in the `marketsvc/` folder.
 
-For this project, we'll be using `Docker` to run our `postgres` database and `Python` microservice.
-So let's start at the [`compose.yaml`](https://docs.docker.com/compose/compose-application-model/#:~:text=The%20Compose%20file,prefers%20the%20canonical%20compose.yaml%20.) file.
-This is the file that tells `docker` which containers are part of our setup and how to configure them.
-
-As you'd expect, there are two `docker` services: `marketdb` and `marketsvc`.
+For this project, we'll be using a `SQLite` database and `Python` microservice with `FastAPI`.
 
 ### marketdb
 
-`marketdb` is the container that runs our `postgres` db.
+Let's start by having have a look at the [`SQLite`](https://www.sqlite.org/) database named `marketdb`.
 
-To use a `postgres` db, we use the [Postgres Docker image](https://hub.docker.com/_/postgres) which runs a `postgres` instance.
+`marketsvc/db/init_db.sql` is a file that will initialise our database with some tables and sample data. 
+It first drops all the tables to enforce a clean database state, creates all tables with the required columns and data types, and inserts some sample data in the tables. 
+Feel free to have a look at it and understand the relationships between the tables.
 
-```yaml
-image: postgres
-env_file: .env.yaml
-```
-
-We set the relevant environment variables so we can interact with the database in the file `.env.yaml`.
-Take a moment to look at its contents.
-
-Next, since we've used port `5432` as our `POSTGRES_PORT` (see .env.yaml), we also need to tell `docker` to expose this port so that the database can receive traffic from outside the container through this port:
-
-```yaml
-    ports:
-    - 5432:5432
-```
-
-Then, we mount a single file `marketdb/init_db.sql` at the `/docker-entrypoint-initdb.d/` path of our `postgres` container.
-This is a file that will initialise our database with some tables and sample data on container start-up.
-Take a look at the contents of `marketdb/init_db.sql` to familiarise yourself with the database structure.
-
-```yaml
-    volumes:
-      - ./marketdb/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
-```
-
-Finally, we define a `healthcheck` to let other `docker` containers understand when the `marketdb` container is healthy and ready to be used.
-We use the utility `pg_isready` to ping the database at a repeated interval until it reports that it's ready.
+`marketsvc/db/init_db.py` is a Python file that actually executes the aforementioned SQL script with SQLite.
 
 ### marketsvc
 
-`marketsvc` is the container that runs our `Python` service.
+There are 2 main layers of our service: server and accessor.
 
-In `marketsvc/Dockerfile`, you can see that it's simply a `Python3.12` image that installs the pip requirements listed in `requirements.txt`.
+#### server.py
 
-```Dockerfile
-FROM python:3.12
+`marketsvc/server.py` is the FastAPI server that handles all our incoming HTTP requests.
+It routes a request with a particular endpoint to the designated function in db_accessor.
 
-WORKDIR /code
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+```py
+app = FastAPI(debug=True)
 ```
+With this line of code, we've initialized a FastAPI application.
+Setting `debug=True` will give us some insights in the terminal window.
 
-To start with, we only have two dependencies for our service, as it's a barebones `flask` service that uses `psycopg2` to query the database.
-You can see how `psycopg2` is used in `marketsvc/db_accessor.py`.
+```py
+uvicorn.run("server:app", host="127.0.0.1", port=9090, reload=True)
+```
+This allows our `app` to run on `127.0.0.1` (localhost) and the `9090` port.
+We've also enabled the hot reload option which makes development easier.
+
+#### db_accessor.py
+ 
+`marketsvc/db_accessor.py` is the accessor layer to the database, where we connect and retrieve data from the database.
 You can see a number of functions that query or update the database with the relevant information.
 
-For `flask`, take a look at `server.py`, as you can see, it is a simple `flask` app that handles various requests it receives.
-Finally, we can communicate with our flask app over port `9090` as you can see in its `compose.yaml` configuration:
+Have a look at these functions and the SQL queries in them.
+The functions to actually execute these queries include a standard way of executing queries with SQLite.
 
-```yaml
-    ports:
-    - 9090:9090
-```
+## Installing Dependencies
 
-Finally, we tell `docker` what order the services need to be started in as `marketdb` needs to be ready first before we start `marketsvc`:
-
-```yaml
-    depends_on:
-      marketdb:
-        condition: service_healthy
-```
-
-## Installing Dependencies for Development
-
-In the previous section, we learned that the `docker` container `marketsvc` will install the required dependencies in the `marketsvc` container to be able to run the service.
-
-But to make our development experience better, it's useful to also install these dependencies in the `venv` of our `Codespaces` container.
-In the previous step, we've created and activated a `venv`.
-Now that we're familiar with the dependencies we will be using, let's install them in our `venv`:
+Assuming you're in the virtual environment, let's install the required dependencies. To do this, run:
 
 ```sh
-python -m pip install -r marketsvc/requirements.txt
+python3.12 -m pip install -r requirements.txt
 ```
 
-You will need to repeat this step every time you add a new package to `marketsvc/requirements.txt` to have `Codespaces` recognise it.
+This will install the packages listed in `requirements.txt`.
 
-To verify that IntelliSense now works correctly, open up any `.py` file in your project.
+You will need to repeat this step every time you add a new package to `requirements.txt`.
+
+Additionally, to verify that IntelliSense now works correctly, open up any `.py` file in your project.
 `cmd`+click or `Ctrl`+click on any import in your file, you should be taken to the source file of the corresponding module.
 
 ## Running our services
 
-Now that we know what to expect, let's run our containers and give them a quick test.
-First, let's build and run our `docker` containers.
-From the repo root, run the following:
+Now that we know what to expect, let's run our service!
+
+In the current terminal window, run:
 
 ```sh
-docker compose build
-```
-
-This tells `docker` to build the containers defined in the `compose.yaml` file.
-When it's done building, run the following:
-
-```sh
-docker compose run -p 9090:9090 marketsvc
+python3.12 marketsvc/server.py
 ```
 
 or you can use the convenience shell script `run.sh` to run the same command:
@@ -123,25 +84,24 @@ or you can use the convenience shell script `run.sh` to run the same command:
 ./run.sh run
 ```
 
-This brings up our two containers.
-In a moment, you should be able to see through the logs that `marketdb` has started first, followed by `marketsvc`.
-
-> _HINT:_ you can also use Codespaces' `Docker` extension to see which containers are running and whether they are healthy.
-
-`marketsvc` should log a message like this once it's ready:
+You should see log a message like this once the server is running:
 
 ```sh
-marketsvc-1  |  * Running on http://127.0.0.1:9090
+Uvicorn running on http://127.0.0.1:9090 (Press CTRL+C to quit)
+Started reloader process [6523] using WatchFiles
+Started server process [6531]
+Waiting for application startup.
+Application startup complete.
 ```
 
-Our flask app is now ready for requests.
-Let's test it by running the following in a new terminal window:
+Our FastAPI app is now ready for requests.
+Let's test it by running the following in a **new terminal window**:
 
 ```sh
 curl -v http://localhost:9090/
 ```
 
-You should see the heading `<h1>Welcome to MarketPlace!</h1>`.
+You should see the heading `<h1>Welcome to Marketplace!</h1>`.
 
 You can also test out any of the other commands.
 For example, we can retrieve a customer's orders by running:
@@ -157,7 +117,7 @@ Now that we understand the codebase, it's time to start with SQLAlchemy!
 >
 > Instead of writing out `curl` commands manually, we have provided a quick shell script for you `run.sh`.
 > Take a look at its contents to see all the supported commands.
-> For example, the curl command above can be run by running: `./run.sh custorders`
+> For example, the curl command above can be run by running: `./run.sh custorders 1`
 {: .block-tip }
 
 &nbsp;
