@@ -12,19 +12,18 @@ Before we begin, log in to your `GitHub` account, or sign up for one if you don'
 
 For this workshop, we'll be using the following technologies:
 
-- [Docker](https://docs.docker.com/get-docker/)
 - [Python 3.12](https://hub.docker.com/_/python)
-- [Postgres](https://hub.docker.com/_/postgres)
+- [SQLite](https://www.sqlite.org/index.html)
 - [SQLAlchemy](https://pypi.org/project/SQLAlchemy/)
-- [Flask](https://flask.palletsprojects.com/en/3.0.x/)
+- [FastAPI](https://fastapi.tiangolo.com/)
 
 Do not worry about installing them, we'll be installing the required tools when needed.
 
 ## Creating your Project
 
 Throughout this workshop, we'll be using an [example project `Marketplace`](https://github.com/rhythm-patel/sqlalchemy-workshop).
-It is a simple micro-service that manages a `postgres` database of orders and customers.
-The micro-service currently uses raw SQL to manage the database, we'll be incrementally working on it to replace the raw SQL with SQLAlchemy, make use of ORMs and optimise our access patterns.
+It is a simple microservice that manages a `SQLite` database of orders and customers.
+The microservice currently uses raw SQL to manage the database, we'll be incrementally working on it to replace the raw SQL with SQLAlchemy, make use of ORMs, and then optimise our access patterns.
 
 After each step, you can refer to the corresponding completed version of the code, under the branch `step-#-<step-title>`.
 
@@ -46,18 +45,15 @@ This will open the code in GitHub `Codespaces` where we will be incrementally ma
 
 ## Useful Extensions
 
-In this tutorial, two useful VS Code extensions will make your development experience smoother:
-
-1. The [Python extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
-
-2. The [Docker extension](https://code.visualstudio.com/docs/containers/overview#_installation)
+In this tutorial, the [Python extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python) for VSCode will make your development experience smoother.
 
 Find the Extensions tab in the left panel of `Codespaces`, and for each extension, search for it by name. Then hit the install button.
-Both extensions are provided by Microsoft.
+The extension is provided by Microsoft.
 
 ## Creating a virtual environment
 
-To get [IntelliSense](https://code.visualstudio.com/docs/editor/intellisense) working, we'll be installing our Python dependencies in a Python virtual environment (`venv`).
+We'll be installing our Python dependencies in a Python virtual environment (`venv`).
+This will also help to get [IntelliSense](https://code.visualstudio.com/docs/editor/intellisense) working,
 Then, we'll point the `Python` extension to our `venv` Python path so that `Codespaces` can recognise the modules we use in our code.
 
 1. In the previous section, you should have installed the `Python` extension.
