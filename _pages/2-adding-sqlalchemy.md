@@ -6,8 +6,8 @@ date: 2024-01-03
 layout: post
 ---
 
-In the last step, we had seen that `db_accessor.py` used `psycopg2`, the PostgreSQL database adapter, to interact with the database.
-In this section, we will introduce SQLAlchemy, whose core will act as an abstraction layer to connect with the PostgresSQL database.
+In the last step, we had seen that `db_accessor.py` used `sqlite3`, the SQLite database adapter, to interact with the database.
+In this section, we will introduce SQLAlchemy, whose core will act as an abstraction layer to connect with the SQLite database.
 
 Before we start making any code changes, we need to install `sqlalchemy` from [PyPI](https://pypi.org/).
 In your `marketsvc/requirements.txt` file, add `sqlalchemy`:
@@ -15,35 +15,19 @@ In your `marketsvc/requirements.txt` file, add `sqlalchemy`:
 ##### marketsvc/requirements.txt
 
 ```txt
-flask
-psycopg2
+fastapi
+uvicorn[standard]
 sqlalchemy
 ruff
 ```
 
-Since we've added a dependency, we need to rebuild the docker container so it can install the new dependency on our `marketsvc` container.
-If your service is already running, first bring it down:
+Since we've added a new dependency, we need to install the new module using `pip`:
 
 ```sh
-docker compose down
-```
-
-Next, build the containers again:
-
-```sh
-docker compose build
+python3.12 -m pip install -r requirements.txt
 ```
 
 Now, we're ready to start making code changes.
-
-> ##### TIP
->
-> If you're using the `Python` Codespaces extension, you also want to install the new dependency `sqlalchemy` in your local `venv`, so that the `Python` extension can recognise it.
-> Assuming your `venv` is activated, run:
-> ```sh
-> python -m pip install -r marketsvc/requirements.txt
-> ```
-{: .block-tip }
 
 ## Engine
 
@@ -54,26 +38,16 @@ Here we create the [`Engine`](https://docs.sqlalchemy.org/en/20/core/engines.htm
 ##### marketsvc/db/base.py
 
 ```py
-import os
-from sqlalchemy import URL, create_engine
+from sqlalchemy import create_engine
 
-url_object = URL.create(
-    "postgresql+psycopg2",
-    username=os.environ.get("POSTGRES_USER"),
-    password=os.environ.get("POSTGRES_PASSWORD"),
-    host=os.environ.get("POSTGRES_DB"),
-    database=os.environ.get("POSTGRES_DB"),
-    port=os.environ.get("POSTGRES_PORT"),
-)
-
-engine = create_engine(url_object, echo=True)
+engine = create_engine("sqlite+pysqlite:///marketdb", echo=True)
 ```
 
-We create the `Engine` with the `create_engine()` method. Here, we have passed in a `URL` object to `create_engine()`, which includes all the necessary information required to connect to a database:
+We create the `Engine` with the `create_engine()` method. Here, we have passed in a string to `create_engine()`, which includes all the necessary information required to connect to a database:
 
-1. Type of database, represented by `postgresql`.
-    This instructs SQLAlchemy to use the PostgreSQL [**dialect**](https://docs.sqlalchemy.org/en/20/glossary.html#term-dialect), which is a system used to communicate with various kinds of databases and their respective drivers.
-2. DBAPI, represented by `psycopg2`.
+1. Type of database, represented by `sqlite`.
+    This instructs SQLAlchemy to use the SQLite [**dialect**](https://docs.sqlalchemy.org/en/20/glossary.html#term-dialect), which is a system used to communicate with various kinds of databases and their respective drivers.
+2. DBAPI, represented by `pysqlite`.
     [**DBAPI**](https://docs.sqlalchemy.org/en/20/glossary.html#term-DBAPI) (Python Database API Specification) is a driver that SQLAlchemy uses to connect to a database.
     It's a "low level" API that lets Python talk to the database.
 3. Database connection configuration like host, port, database, username, and password.
@@ -126,15 +100,14 @@ In order to format the response correctly, let's edit the `customers()` function
 ##### marketsvc/server.py
 
 ```py
-@app.route("/api/customers")
+@app.get("/api/customers")
 def customers():
     customers = get_customers()
-    response = [customer._asdict() for customer in customers]
-    return jsonify(response)
+    return (customer._asdict() for customer in customers)
 ```
 
 At this point, the API to fetch customers is updated to use SQLAlchemy.
-Run the containers:
+Run the service:
 
 ```sh
 ./run.sh run
@@ -151,7 +124,7 @@ Now, in another shell, hit the `/api/customers` endpoint using `curl`. or use ou
 ```sql
 BEGIN (implicit)
 SELECT * FROM customer
-[generated in 0.00021s] {}
+[generated in 0.00021s] ()
 ROLLBACK
 ```
 
@@ -193,9 +166,10 @@ Let's update `execute_insert_query()` to invoke `Connection.commit()`.
 ##### marketsvc/db_accessor.py
 
 ```py
-def execute_insert_query(query, params=None):
+def execute_insert_query(query, params):
     with engine.connect() as conn:
-        result = conn.execute(text(query), params)
+        cursor = conn.execute(text(query), params)
+        result = cursor.fetchone()
         conn.commit()
         return result
 ```
@@ -205,17 +179,16 @@ Let's also bind some parameters to the query in `add_new_order_for_customer()`.
 ```py
 def add_new_order_for_customer(customer_id, items):
     try:
-        result = execute_insert_query(
-            """`
+        new_order_id = execute_insert_query(
+            """
             INSERT INTO orders
                 (customer_id, order_time)
             VALUES
-                (:customer_id, NOW())
+                (:customer_id, Date('now'))
             RETURNING id
             """,
             {"customer_id": customer_id},
-        )
-        new_order_id = result.one().id
+        ).id
         
         return True
 
@@ -228,8 +201,8 @@ If you were to run `add_new_order_for_customer()` at this point, where you inser
 ##### SQLAlchemy logs:
 ```sql
 BEGIN (implicit)
-INSERT INTO orders (customer_id, order_time) VALUES (%(customer_id)s, NOW()) RETURNING id
-[generated in 0.00041s] {'customer_id': 1}
+INSERT INTO orders (customer_id, order_time) VALUES (?, Date('now')) RETURNING id
+[generated in 0.00041s] (1,)
 COMMIT
 ```
 
@@ -245,35 +218,32 @@ Putting both insert queries together, your function should now look like this:
 ```py
 def add_new_order_for_customer(customer_id, items):
     try:
-        result = execute_insert_query(
-            """`
+        new_order_id = execute_insert_query(
+            """
             INSERT INTO orders
                 (customer_id, order_time)
             VALUES
-                (:customer_id, NOW())
+                (:customer_id, Date('now'))
             RETURNING id
             """,
             {"customer_id": customer_id},
-        )
-        new_order_id = result.one().id
+        ).id
 
-        (
-            execute_insert_query(
-                """
-            INSERT INTO order_items
-                (order_id, item_id, quantity)
-            VALUES
-                (:order_id, :item_id, :quantity)
-            """,
-                [
-                    {
-                        "order_id": new_order_id,
-                        "item_id": item["id"],
-                        "quantity": item["quantity"],
-                    }
-                    for item in items
-                ],
-            )
+        execute_insert_queries(
+            """
+        INSERT INTO order_items
+            (order_id, item_id, quantity)
+        VALUES
+            (:order_id, :item_id, :quantity)
+        """,
+            [
+                {
+                    "order_id": new_order_id,
+                    "item_id": item["id"],
+                    "quantity": item["quantity"],
+                }
+                for item in items
+            ],
         )
         return True
 
@@ -317,7 +287,7 @@ with engine.begin() as conn:
 ```sql
 BEGIN (implicit)
 INSERT INTO orders ...
-[generated in 0.00041s] {...}
+[generated in 0.00041s] (...)
 COMMIT
 ```
 
