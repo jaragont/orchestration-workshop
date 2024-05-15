@@ -257,11 +257,10 @@ Finally, let's update `customers()` in `server.py` to get the `Customer` objects
 ##### marketsvc/server.py
 
 ```py
-@app.route("/api/customers")
+@app.get("/api/customers")
 def customers():
     customers = get_customers()
-    response = [customer.as_dict() for customer in customers]
-    return jsonify(response)
+    return (customer.as_dict() for customer in customers)
 ```
 
 You may now hit the endpoint with:
@@ -276,7 +275,7 @@ You may now hit the endpoint with:
 BEGIN (implicit)
 SELECT customer.id, customer.name, customer.address_id, address_1.id AS id_1, address_1.flat_number, address_1.post_code 
 FROM customer LEFT OUTER JOIN address AS address_1 ON address_1.id = customer.address_id
-[generated in 0.00019s] {}
+[generated in 0.00019s] ()
 ROLLBACK
 ```
 
@@ -353,6 +352,7 @@ def add_new_order_for_customer(customer_id, items):
         return True
 
     except Exception:
+        logging.exception("Failed to add new order")
         return False
 ```
 
@@ -382,12 +382,12 @@ You can call this function to insert a new order by hitting the `add_new_order` 
 BEGIN (implicit)
 SELECT customer.id, customer.name, customer.address_id, address_1.id AS id_1, address_1.flat_number, address_1.post_code 
 FROM customer LEFT OUTER JOIN address AS address_1 ON address_1.id = customer.address_id 
-WHERE customer.id = %(id_2)s
-[generated in 0.00014s] {'id_2': 1}
-INSERT INTO orders (customer_id, order_time) VALUES (%(customer_id)s, %(order_time)s) RETURNING orders.id
-[generated in 0.00012s] {'customer_id': 1, 'order_time': datetime.datetime(2024, 4, 7, 19, 41, 12, 956363)}
-INSERT INTO order_items (order_id, item_id, quantity) VALUES (%(order_id__0)s, %(item_id__0)s, %(quantity__0)s), (%(order_id__1)s, %(item_id__1)s, %(quantity__1)s)
-[generated in 0.00006s (insertmanyvalues) 1/1 (unordered)] {'order_id__0': 18, 'quantity__0': 4, 'item_id__0': 2, 'order_id__1': 18, 'quantity__1': 6, 'item_id__1': 3}
+WHERE customer.id = ?
+[generated in 0.00016s] (1,)
+INSERT INTO orders (customer_id, order_time) VALUES (?, ?)
+[generated in 0.00013s] (1, '2024-05-15 10:44:30.605436')
+INSERT INTO order_items (order_id, item_id, quantity) VALUES (?, ?, ?)
+[generated in 0.00011s] [(4, 2, 4), (4, 3, 6)]
 COMMIT
 ```
 
