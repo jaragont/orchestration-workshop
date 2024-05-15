@@ -9,53 +9,61 @@ layout: post
 ## Overview
 
 Let's explore the files in `Marketplace`.
+`Marketplace` is a `FastAPI` Python microservice that manages a `SQLite` database.
+It retrieves information about customers, orders and can add new orders.
+
 Our Python application directory is `marketsvc/`.
 All the changes we'll be making in this tutorial will be in the `marketsvc/` folder.
 
-For this project, we'll be using a `SQLite` database and `Python` microservice with `FastAPI`.
-
 ### marketdb
 
-Let's start by having have a look at the [`SQLite`](https://www.sqlite.org/) database named `marketdb`.
+Let's have a look at the [`SQLite`](https://www.sqlite.org/) database named `marketdb`.
 
-`marketsvc/db/init_db.sql` is a file that will initialise our database with some tables and sample data. 
-It first drops all the tables to enforce a clean database state, creates all tables with the required columns and data types, and inserts some sample data in the tables. 
-Feel free to have a look at it and understand the relationships between the tables.
+Take a look at the SQL script `marketsvc/db/init_db.sql`.
+It initialises our database with some tables and sample data.
+
+For the purposes of this workshop, on service startup, the service executes this script to populate the database with sample data and reset it's state.
+Take a look at it's contents to understand what tables to expect and the relationships between them.
 
 `marketsvc/db/init_db.py` is a Python file that actually executes the aforementioned SQL script with SQLite.
 
 ### marketsvc
 
-There are 2 main layers of our service: server and accessor.
+Our service consists of two layers: the API layer and the database interface layer.
 
-#### server.py
+#### The API layer
 
-`marketsvc/server.py` is the FastAPI server that handles all our incoming HTTP requests.
-It routes a request with a particular endpoint to the designated function in db_accessor.
+The API layer is implemented in `marketsvc/server.py`, which runs a `FastAPI` server that handles all our incoming HTTP requests.
+For each API endpoint, it's request handler function uses the relevant functions from the database interface layer to prepare the appropriate response.
 
 ```py
 app = FastAPI(debug=True)
 ```
+
 With this line of code, we've initialized a FastAPI application.
-Setting `debug=True` will give us some insights in the terminal window.
+Setting `debug=True` prints insightful logs to `stdout`.
 
 ```py
 uvicorn.run("server:app", host="127.0.0.1", port=9090, reload=True)
 ```
-This allows our `app` to run on `127.0.0.1` (localhost) and the `9090` port.
+
+Here, we are using `uvicorn` to customise the way our `FastAPI` app is run.
+We've chosen to run our `app` on `127.0.0.1` (localhost) and listen to HTTP traffic on port `9090`.
 We've also enabled the hot reload option which makes development easier.
 
-#### db_accessor.py
- 
+#### The database interface layer
+
 `marketsvc/db_accessor.py` is the accessor layer to the database, where we connect and retrieve data from the database.
 You can see a number of functions that query or update the database with the relevant information.
+Currently, they are using the `sqlite3` library and make raw SQL queries to SELECT/INSERT into the database.
+We will be updating those queries over the course of this workshop.
 
-Have a look at these functions and the SQL queries in them.
-The functions to actually execute these queries include a standard way of executing queries with SQLite.
+Have a look at these functions to familiarise yourself with the queries they are performing.
 
 ## Installing Dependencies
 
-Assuming you're in the virtual environment, let's install the required dependencies. To do this, run:
+With your virtual environment activated, let's install the required dependencies.
+To do this, run:
 
 ```sh
 python3.12 -m pip install -r requirements.txt
@@ -65,8 +73,8 @@ This will install the packages listed in `requirements.txt`.
 
 You will need to repeat this step every time you add a new package to `requirements.txt`.
 
-Additionally, to verify that IntelliSense now works correctly, open up any `.py` file in your project.
-`cmd`+click or `Ctrl`+click on any import in your file, you should be taken to the source file of the corresponding module.
+To verify that `IntelliSense` now works correctly, open up any `.py` file in your project.
+`cmd`+click or `Ctrl`+click on any import in your file, you should be taken to the source file of the corresponding package.
 
 ## Running our services
 
