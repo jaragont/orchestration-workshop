@@ -245,6 +245,7 @@ def add_new_order_for_customer(customer_id, items):
                 for item in items
             ],
         )
+        
         return True
 
     except Exception:
