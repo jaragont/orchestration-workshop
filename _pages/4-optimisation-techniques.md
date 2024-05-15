@@ -70,14 +70,14 @@ You can run this by using `./run.sh customers`.
 
 ```sql
 BEGIN (implicit)
-SELECT customer.id, customer.name, customer.address_id FROM customer
-[generated in 0.00044s] {}
-SELECT address.id AS address_id, address.flat_number AS address_flat_number, address.post_code AS address_post_code FROM address WHERE address.id = %(pk_1)s
-[generated in 0.00029s] {'pk_1': 1}
-SELECT address.id AS address_id, address.flat_number AS address_flat_number, address.post_code AS address_post_code FROM address WHERE address.id = %(pk_1)s
-[cached since 0.002041s ago] {'pk_1': 2}
-SELECT address.id AS address_id, address.flat_number AS address_flat_number, address.post_code AS address_post_code FROM address WHERE address.id = %(pk_1)s
-[cached since 0.003015s ago] {'pk_1': 3}
+SELECT customer.id, customer.name, customer.address_id  FROM customer
+[generated in 0.00023s] ()
+SELECT address.id AS address_id, address.flat_number AS address_flat_number, address.post_code AS address_post_code FROM address WHERE address.id = ?
+[generated in 0.00016s] (1,)
+SELECT address.id AS address_id, address.flat_number AS address_flat_number, address.post_code AS address_post_code  FROM address WHERE address.id = ?
+[cached since 0.001042s ago] (2,)
+SELECT address.id AS address_id, address.flat_number AS address_flat_number, address.post_code AS address_post_code  FROM address WHERE address.id = ?
+[cached since 0.001606s ago] (3,)
 ROLLBACK
 ```
 
@@ -128,7 +128,7 @@ Once again, run this by using `./run.sh customers`.
 BEGIN (implicit)
 SELECT customer.id, customer.name, customer.address_id, address_1.id AS id_1, address_1.flat_number, address_1.post_code 
 FROM customer LEFT OUTER JOIN address AS address_1 ON address_1.id = customer.address_id
-[generated in 0.00020s] {}
+[generated in 0.00075s] ()
 ROLLBACK
 ```
 
@@ -169,7 +169,9 @@ def get_total_cost_of_an_order(order_id):
             .join(OrderItems.item)
             .where(Orders.id == order_id)
         )
-        return result.scalar()
+        total_cost = result.scalar()
+
+        return total_cost
 ```
 
 Hit the `/api/order_total` endpoint by using the shell script with a argument that indicates the `order_id` of the order you wish to get the total of.
@@ -184,8 +186,8 @@ Hit the `/api/order_total` endpoint by using the shell script with a argument th
 BEGIN (implicit)
 SELECT sum(item.price * order_items.quantity) AS sum_1 
 FROM orders JOIN order_items ON orders.id = order_items.order_id JOIN item ON item.id = order_items.item_id 
-WHERE orders.id = %(id_1)s
-[generated in 0.00016s] {'id_1': '1'}
+WHERE orders.id = ?
+[generated in 0.00024s] (1,)
 ROLLBACK
 ```
 
@@ -276,7 +278,9 @@ def get_total_cost_of_an_order(order_id):
             .join(OrderItems.item)
             .where(Orders.id == order_id)
         )
-        return result.scalar()
+        total_cost = result.scalar()
+
+        return total_cost
 ```
 
 `OrderItems.item_total` would be equivalent to `Item.price * OrderItems.quantity` used earlier.
