@@ -101,7 +101,7 @@ Let's test it by running the following in a **new terminal window**:
 curl -v http://localhost:9090/
 ```
 
-You should see the heading `<h1>Welcome to Marketplace!</h1>`.
+You should see the text `Welcome to Marketplace!`.
 
 You can also test out any of the other commands.
 For example, we can retrieve a customer's orders by running:
