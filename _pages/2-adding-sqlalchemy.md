@@ -135,6 +135,20 @@ As you can see from the logs, a **ROLLBACK** was emitted at the end.
 This marked the of the transaction.
 An automatic rollback occurs when a connection is closed after use, to ensure that the connection is 'clean' for its next use.
 
+What if we wanted to access a specific property from our results?
+let's take a look at `get_total_cost_of_an_order(order_id)`.
+Here we want to access the `total` value that we've computed in our SQL query.
+How do we do that?
+
+As we learned above, `execute_query()` returns an iterable of `Row` objects.
+We expect a single `Row` in our `Result` iterable, so we access it as follows:
+
+```py
+def get_total_cost_of_an_order(order_id):
+    rows = execute_query(...)
+    return rows.one().total
+```
+
 > ##### Test Your Understanding
 >
 > Now that you understand how SELECT queries work in SQLAlchemy, are there any other `@app.get` endpoints in our service that require updates to their `server.py` or `db_accessor.py` handlers?
