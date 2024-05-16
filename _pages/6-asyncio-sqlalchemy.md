@@ -136,7 +136,7 @@ We now want to replace the vanilla `aiosqlite` library with `SQLAlchemy` so we c
 
 First, we'll add back `sqlalchemy` to our `requirements.txt`:
 
-##### marketsvc/requirements.txt
+##### requirements.txt
 
 ```txt
 aiosqlite
