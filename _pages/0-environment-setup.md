@@ -29,14 +29,14 @@ After each step, you can refer to the corresponding completed version of the cod
 
 Now, let's get started!
 
-1. Visit the [example repo](https://github.com/rhythm-patel/sqlalchemy-workshop) and hit the button "Use Template" > "Create new repository".
-You will be redirected to a page to create a new repository in your org based on our example repo.
+1. Visit the [example repo](https://github.com/rhythm-patel/sqlalchemy-workshop) and **fork** the repository by clicking "Fork" > "Create a new fork".
+You will be redirected to a the fork of this repository in your account or organization.
 
-    ![image1](/sqlalchemy-wkshop/assets/gitbook/images/use_template.png)
+    ![image1](/sqlalchemy-wkshop/assets/gitbook/images/create_a_new_fork.png)
 
-2. **Make sure to tick the box `include all branches`**, then give your repo a name.
+2. **Make sure to uncheck the box `Copy the 'main' branch only`**, to include all the branches.
 
-    ![image2](/sqlalchemy-wkshop/assets/gitbook/images/create_repo.png)
+    ![image2](/sqlalchemy-wkshop/assets/gitbook/images/copy_all_branches.png)
 
 3. Once your repo is created, click on the `Code` menu, and from the `Codespaces` tab, click `Create codespace on main`.
 This will open the code in GitHub `Codespaces` where we will be incrementally making updates to the code.
