@@ -202,10 +202,9 @@ def execute_insert_query(query, params):
         return result
 ```
 
-Here, we've used the resulting `Cursor` object from the `execute` statement to fetch a single result, as we expect our statement to result in exactly one result.
-This result is in the form of a Python `namedtuple`.
+Here, we've used the resulting `Cursor` object from the `execute` statement to fetch a single result, as we expect our statement to result in exactly one `Row`.
 
-Therefore, we can update `add_new_order_for_customer()` to fetch the `id` of the new order by using `.id`:
+Therefore, we can update `add_new_order_for_customer()` to fetch the `id` of the new order by using `.id`, as the `Row` object behaves like a `namedtuple`:
 
 ```py
 def add_new_order_for_customer(customer_id, items):
