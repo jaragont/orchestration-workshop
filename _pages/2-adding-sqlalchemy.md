@@ -138,7 +138,7 @@ An automatic rollback occurs when a connection is closed after use, to ensure th
 > ##### Test Your Understanding
 >
 > Now that you understand how SELECT queries work in SQLAlchemy, are there any other `@app.get` endpoints in our service that require updates to their `server.py` or `db_accessor.py` handlers?
-> If you are stuck, sneak a peak at branch `step-2-sqlalchemy` for a hint!
+> If you are stuck, take a look at the branch `step-2-sqlalchemy` for a hint!
 >
 {: .block-tip }
 

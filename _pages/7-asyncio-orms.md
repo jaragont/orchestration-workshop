@@ -18,6 +18,7 @@ git checkout step-7-asyncio-orms-base
 This essentially builds on the work we've done in `step-3-orms` but uses the async engine we added in the previous step.
 
 To start, we'll need to use an [`AsyncSession`](https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncSession).
+Much like it's synchronous counter-part, `AsyncSession` serves as a place to hold your state during the lifetime of a single database transacion.
 Since we [need a dedicated session per connection](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#using-asyncsession-with-concurrent-tasks), we'll use a factory to create our `AsyncSession`s.
 
 To do this, we'll start in `db/base.py` add the following imports:
@@ -35,11 +36,11 @@ from sqlalchemy.ext.asyncio import (
 Next, we create an `async_sessionmaker` to create our `AsyncSession` instances:
 
 ```py
-engine = create_async_engine(url_object, poolclass=NullPool, echo=True)
+engine = create_async_engine("sqlite+aiosqlite:///marketdb", echo=True)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 ```
 
-This returns an `AsyncSession` object that we can use in `db_accessor.py`.
+This returns an `AsyncSession` factory that we can use in `db_accessor.py`.
 
 Finally, we need to update our `Base` class to use the `AsyncAttrs` mixin:
 
@@ -88,8 +89,7 @@ First, we replace the `Session` with an `AsyncSession`:
 
 ```py
 async def get_customers():
-    async_session = async_session_maker()
-    async with async_session() as session:
+    async with async_session_maker() as session:
 ```
 
 Using the session's context manager means we do not have to explicitly call `session.close()` when we are done.
@@ -99,6 +99,7 @@ Next, since we want to stream one customer object at a time rather query them al
 ##### marketsvc/db_accessor.py
 
 ```py
+async def get_customers():
     async with async_session_maker() as session:
         stmt = select(Customer)
         async for customer in await session.stream_scalars(stmt):
@@ -119,10 +120,9 @@ As we don't need to stream a series of results here, all we need to do is just u
 
 ```py
 async def get_total_cost_of_an_order(order_id):
-    async_session = async_session_maker()
-    async with async_session() as session:
+    async with async_session_maker() as session:
         result = await session.execute(
-            select(func.sum(OrderItems.item_total_expression)
+            select(func.sum(OrderItems.item_total))
             .join(Orders.order_items)
             .join(OrderItems.item)
             .where(Orders.id == order_id)
@@ -133,9 +133,13 @@ async def get_total_cost_of_an_order(order_id):
 Finally, for `insert_order_items()`, we use the `async` version of the `session`.
 What operations do you think we need to `await` here?
 
-- `session.execute()`
-- `session.add()`
-- `session.commit()`
+1. `session.execute()`
+2. `session.add()`
+3. `session.commit()`
+
+If you have answered 1 and 3, you are correct.
+[AsyncSession.add](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#sqlalchemy.ext.asyncio.AsyncSession.add) won't actually contact the database until we flush or commit the data.
+And since it performs no I/O operation here, we do not `await` it.
 
 ##### marketsvc/db_accessor.py
 

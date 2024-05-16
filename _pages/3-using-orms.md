@@ -33,7 +33,7 @@ Each mapped class will refer to a particular database table.
 ### Mapped Classes
 
 The foundational unit of SQL when using the ORM is the Mapped Class.
-As we discovered, individual mapped classes are created by subclassing `Base`.
+As we learned, individual mapped classes are created by subclassing `Base`.
 
 With this in mind, let's create a mapped class for `Customer` in `db/customer.py`.
 
