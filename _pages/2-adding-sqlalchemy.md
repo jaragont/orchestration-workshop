@@ -248,7 +248,6 @@ The first adds a new order to the `orders` table, and the second adds the items 
 
 Next, let's update `execute_insert_queries()` to use SQLAlchemy:
 
-##### SQLAlchemy logs:
 ```py
 def execute_insert_queries(query, params_tuple):
     with engine.connect() as conn:
