@@ -59,7 +59,7 @@ To prevent implicit IO calls with `asyncio`, we access lazily-loaded attributes 
 await my_obj.awaitable_attrs.my_attr
 ```
 
-Note that SQLAlchemy will throw an exception if an implicit IO call is in `async` mode.
+Note that async SQLAlchemy will throw an exception if an implicit IO call (synchronous) is made.
 
 For example, if `Customer` had a lazily-loaded relationship to `Address`.
 To access `address`, I need to `await` another SELECT statement to be executed.
