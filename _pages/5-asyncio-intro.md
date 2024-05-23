@@ -47,7 +47,7 @@ It allows you to schedule and run Python coroutines concurrently on an event loo
 
 On a high level, `asyncio` implements cooperative multitasking by scheduling coroutines on an event loop.
 
-For our understanding, we are model an event loop using a priority queue (left to right).
+For our understanding, we model an event loop using a priority queue (left to right).
 At a given moment, `asyncio` will run the first `READY` task on the queue:
 
 ![event loop](/sqlalchemy-wkshop/assets/gitbook/images/tasks_queue.png)
@@ -63,7 +63,7 @@ We also log the start time and end time of the job execution so we can better un
 We have also turned our `main()` function into an `async` coroutine.
 In `main()`, we `await` two tasks, "order milk" and "order bread", taking 1 and 2 seconds, respectively.
 
-Finally, on L20, we start the execution by running `main()` on the event loop.
+Finally, on L23, we start the execution by running `main()` on the event loop.
 The program terminates when the event loop doesn't have any more tasks to run.
 
 What do you expect to happen when we run this program?
@@ -82,7 +82,7 @@ Let's take a look at the order of events:
 
 ![gif](/sqlalchemy-wkshop/assets/gitbook/images/02-async_tasks.gif)
 
-On L12, we schedule and run `worker(1, "order milk")`, let's call it `task1`.
+On L14, we schedule and run `worker(1, "order milk")`, let's call it `task1`.
 Because of the `await` on L14, the `main()` coroutine is paused there and yields control until `task1` is done executing.
 Once the `await asyncio.sleep(delay)` on L9 is done, `task1` is resumed, prints its final message to stdout and signals that it's done.
 This resumes the next ready coroutine on the event loop which is `main()` and advances the execution to L15.
@@ -103,7 +103,7 @@ Open the file `03-scheduling-tasks`.
 To understand better how `Tasks` are scheduled and run on the event loop, we modify the example from `02-async_tasks.py` to schedule then `await` our tasks.
 
 > ##### TIP
-> 
+>
 > In `asyncio` terminology, a [Task](https://docs.python.org/3/library/asyncio-task.html#asyncio.Task) is a future-like object that runs a coroutine on an event loop [^3].
 {: .block-tip }
 
@@ -223,7 +223,7 @@ Instead, we `await q.join()` then call `shop.cancel()` on each of the shop tasks
 
 What happens if `main()` terminates while `shops` tasks are still running?
 
-When `main()` terminates, `asyncio.run()` on L68 will be done, and it will cancel the remaining tasks on the event loop:
+When `main()` terminates, `asyncio.run()` on L88 will be done, and it will cancel the remaining tasks on the event loop:
 This raises the `asyncio.exceptions.CancelledError` exception, which we have chosen to handle on L64.
 
 ## References
