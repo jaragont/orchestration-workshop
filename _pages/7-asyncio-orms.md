@@ -71,7 +71,7 @@ address = await customer.awaitable_attrs.address
 We elected to use `expire_on_commit=False` so we can access queried objects after a `session.commit()`
 
 > ##### WARNING
-> 
+>
 > The AsyncSession object is a mutable, stateful object which represents a single, stateful database transaction in progress.
 > Using concurrent tasks with `asyncio`, with APIs such as `asyncio.gather()` for example, should use a separate AsyncSession per individual task.
 > See [this link](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#using-asyncsession-with-concurrent-tasks) for more info.
@@ -88,6 +88,8 @@ First, we replace the `Session` with an `AsyncSession`:
 ##### marketsvc/db_accessor.py
 
 ```py
+from db.base import async_session_maker
+
 async def get_customers():
     async with async_session_maker() as session:
 ```
