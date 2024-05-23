@@ -255,7 +255,13 @@ def execute_insert_queries(query, params_tuple):
         conn.commit()
 ```
 
-Now, if you uncomment `add_new_order_for_customer()` and run it again, you should see the generated SQLAlchemy logs for both INSERT statements.
+> ##### Test Your Understanding
+>
+> Now, if you uncomment `execute_insert_queries()` in `add_new_order_for_customer()` and hit the API again, you should see the generated SQLAlchemy logs for both INSERT statements.
+> Can you predict the output of the logs?
+>
+{: .block-tip }
+
 
 Note here that the difference in the implementation between `execute_insert_query()` and `execute_insert_queries()` is that in the former, we fetch results from the cursor.
 

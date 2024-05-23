@@ -273,7 +273,7 @@ You may now hit the endpoint with:
 
 ```sql
 BEGIN (implicit)
-SELECT customer.id, customer.name, customer.address_id, address_1.id AS id_1, address_1.flat_number, address_1.post_code 
+SELECT customer.id, customer.name, customer.address_id, address_1.id AS id_1, address_1.flat_number, address_1.post_code
 FROM customer LEFT OUTER JOIN address AS address_1 ON address_1.id = customer.address_id
 [generated in 0.00019s] ()
 ROLLBACK
@@ -380,8 +380,8 @@ You can call this function to insert a new order by hitting the `add_new_order` 
 
 ```sql
 BEGIN (implicit)
-SELECT customer.id, customer.name, customer.address_id, address_1.id AS id_1, address_1.flat_number, address_1.post_code 
-FROM customer LEFT OUTER JOIN address AS address_1 ON address_1.id = customer.address_id 
+SELECT customer.id, customer.name, customer.address_id, address_1.id AS id_1, address_1.flat_number, address_1.post_code
+FROM customer LEFT OUTER JOIN address AS address_1 ON address_1.id = customer.address_id
 WHERE customer.id = ?
 [generated in 0.00016s] (1,)
 INSERT INTO orders (customer_id, order_time) VALUES (?, ?)
@@ -392,6 +392,12 @@ COMMIT
 ```
 
 The first **SELECT** statement is to fetch the existing customer with the given `customer_id`. The first **INSERT** statement inserts data into the `orders` table and returns the generated `id` of the new inserted order. The second **INSERT** statement inserts multiple records to the `order_items` table using the same `id`. Notice how SQLAlchemy is using bound parameters for all the statements. Finally, we have a **COMMIT** to depict the data has been successfully comitted to the database.
+
+> ##### Test Your Understanding
+>
+> Can we make our `add_new_order_for_customer()` a little bit better and cleaner?
+>
+{: .block-tip }
 
 > ##### Did you Know?
 >
