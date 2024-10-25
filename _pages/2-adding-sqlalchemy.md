@@ -275,7 +275,7 @@ sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) cannot commit transa
 ### Begin Once
 
 Another way to commit data is to use the context manager `Engine.begin()` instead of `Engine.connect()`.
-It will declare the whole block to be one transcation block, and will enclose everything inside the transaction with one **COMMIT** at the end.
+It will declare the whole block to be one transaction block, and will enclose everything inside the transaction with one **COMMIT** at the end.
 This method is called **begin once**.
 
 ```py
