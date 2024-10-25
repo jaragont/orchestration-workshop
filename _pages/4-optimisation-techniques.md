@@ -108,7 +108,7 @@ Consequently, for N parent objects, we would have **N + 1 SELECT** statements.
 We can fix the N+1 problem by using **eager loading**, where the related objects are loaded with the parent object up front.
 The child objects are automatically loaded along with its parent object.
 
-The ORM accomplishes this by consolidating a **JOIN** to the **SELECT** statement to load the related objects at simultaneously, or by emitting additional **SELECT** statements to load the related child objects.
+The ORM accomplishes this by consolidating a **JOIN** to the **SELECT** statement to load the related objects simultaneously, or by emitting additional **SELECT** statements to load the related child objects.
 
 Eager loading is advantageous when we want to fetch information about all or numerous child objects along with its parent object.
 It's also a good practice to use this to reduce further queries and alleviate further load to the database.
@@ -126,7 +126,7 @@ Once again, run this by using `./run.sh customers`.
 
 ```sql
 BEGIN (implicit)
-SELECT customer.id, customer.name, customer.address_id, address_1.id AS id_1, address_1.flat_number, address_1.post_code 
+SELECT customer.id, customer.name, customer.address_id, address_1.id AS id_1, address_1.flat_number, address_1.post_code
 FROM customer LEFT OUTER JOIN address AS address_1 ON address_1.id = customer.address_id
 [generated in 0.00075s] ()
 ROLLBACK
@@ -184,8 +184,8 @@ Hit the `/api/order_total` endpoint by using the shell script with a argument th
 
 ```sql
 BEGIN (implicit)
-SELECT sum(item.price * order_items.quantity) AS sum_1 
-FROM orders JOIN order_items ON orders.id = order_items.order_id JOIN item ON item.id = order_items.item_id 
+SELECT sum(item.price * order_items.quantity) AS sum_1
+FROM orders JOIN order_items ON orders.id = order_items.order_id JOIN item ON item.id = order_items.item_id
 WHERE orders.id = ?
 [generated in 0.00024s] (1,)
 ROLLBACK

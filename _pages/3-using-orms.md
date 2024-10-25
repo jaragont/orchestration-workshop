@@ -57,7 +57,7 @@ class Customer(Base):
 
 We indicate the name of the table by using the [`__tablename__`](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.DeclarativeBase.__tablename__) class-level attribute.
 
-We declare the columns by adding them as attributes along with a special type called [`Mapped`](https://docs.sqlalchemy.org/en/20/orm/internals.html#sqlalchemy.orm.Mapped), which is driven from type annotations defined [PEP 484](https://peps.python.org/pep-0484/).
+We declare the columns by adding them as attributes along with a special type called [`Mapped`](https://docs.sqlalchemy.org/en/20/orm/internals.html#sqlalchemy.orm.Mapped), which is driven from type annotations defined in [PEP 484](https://peps.python.org/pep-0484/).
 The name of each attribute corresponds to the name of the column in the table.
 The datatype is inferred from the `Mapped` type, such as `int` becomes `INTEGER`, `str` becomes `VARCHAR`, etc.
 
