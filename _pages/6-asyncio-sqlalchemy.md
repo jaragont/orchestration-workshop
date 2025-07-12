@@ -17,12 +17,6 @@ git checkout step-6-asyncio-sqlalchemy-base
 This is an async version of the service we saw in `main`.
 It uses the [`aiosqlite`](https://pypi.org/project/aiosqlite/), the `async` version of `sqlite`.
 
-Since we've added a new packages, we need to re-install our `pip` requirements:
-
-```sh
-python3.12 -m pip install -r requirements.txt
-```
-
 Now, let's read through a few differences between the sync and async versions.
 
 ### db_accessor.py
@@ -132,24 +126,9 @@ Feel free to stop here and play around with the service:
 
 ## Adding SQLAlchemy
 
-We now want to replace the vanilla `aiosqlite` library with `SQLAlchemy` so we can get the same benefits we got with our sync service.
-
-First, we'll add back `sqlalchemy` to our `requirements.txt`:
-
-##### requirements.txt
-
-```txt
-aiosqlite
-fastapi
-uvicorn[standard]
-sqlalchemy
-greenlet
-ruff
-```
-
 ### The Async Engine
 
-Next, we want to create an async SQLAlchemy engine.
+We want to create an async SQLAlchemy engine.
 Like we did in step 2, create a new file `marketsvc/db/base.py` with the following contents:
 
 ##### marketsvc/db/base.py

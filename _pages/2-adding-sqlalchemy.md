@@ -9,27 +9,6 @@ layout: post
 In the last step, we had seen that `db_accessor.py` used `sqlite3`, the SQLite database adapter, to interact with the database.
 In this section, we will introduce SQLAlchemy, whose core will act as an abstraction layer to connect with the SQLite database.
 
-Before we start making any code changes, we need to install `sqlalchemy` from [PyPI](https://pypi.org/).
-In your `requirements.txt` file, add `sqlalchemy`:
-
-##### requirements.txt
-
-```txt
-fastapi
-uvicorn[standard]
-sqlalchemy
-ruff
-```
-
-Since we've added a new dependency, we need to install the new module using `pip`.
-In a terminal window where your `venv` is active, run the following:
-
-```sh
-python3.12 -m pip install -r requirements.txt
-```
-
-Now, we're ready to start making code changes.
-
 ## Engine
 
 Let's create `db/base.py` in the `marketsvc` folder to keep the database connection configuration in one place.

@@ -71,8 +71,6 @@ python3.12 -m pip install -r requirements.txt
 
 This will install the packages listed in `requirements.txt`.
 
-You will need to repeat this step every time you add a new package to `requirements.txt`.
-
 To verify that `IntelliSense` now works correctly, open up any `.py` file in your project.
 `cmd`+click or `Ctrl`+click on any import in your file, you should be taken to the source file of the corresponding package.
 
