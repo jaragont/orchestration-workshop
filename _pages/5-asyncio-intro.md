@@ -124,22 +124,16 @@ Here is a list of steps, showing the pseudo-state of the event-loop after each s
 ![gif](/sqlalchemy-wkshop/assets/gitbook/images/03-scheduling_tasks.gif)
 
 T0: task1 scheduled, task2 scheduled, `main()` yields control at L23.
-Event loop:
 
 T1: task1 prints its start time, yields control as it awaits the sleep on L9.
-Event loop:
 
 T2: task2 prints its start time, yields control as it awaits the sleep on L9.
-Event loop:
 
 T3: the next ready task is task1, it prints its end time and terminates, which makes main ready.
-Event loop:
 
 T4: the next ready task is main, its execution advances to the next await on L24.
-Event loop:
 
 T5: task2 prints its end time and terminates, which makes main ready.
-Event loop:
 
 T6: finally, main resumes and terminates, the event loop is now empty.
 execution resumes at L24 and the program terminates.
@@ -223,7 +217,7 @@ Instead, we `await q.join()` then call `shop.cancel()` on each of the shop tasks
 
 What happens if `main()` terminates while `shops` tasks are still running?
 
-When `main()` terminates, `asyncio.run()` on L88 will be done, and it will cancel the remaining tasks on the event loop:
+When `main()` terminates, `asyncio.run()` on L88 will be done, and it will cancel the remaining tasks on the event loop.
 This raises the `asyncio.exceptions.CancelledError` exception, which we have chosen to handle on L64.
 
 ## References
