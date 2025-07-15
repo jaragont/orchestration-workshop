@@ -23,7 +23,7 @@ Take a look at the SQL script `marketsvc/db/init_db.sql`.
 It initialises our database with some tables and sample data.
 
 For the purposes of this workshop, on service startup, the service executes this script to populate the database with sample data and reset it's state.
-Take a look at it's contents to understand what tables to expect and the relationships between them.
+Take a look at its contents to understand what tables to expect and the relationships between them.
 
 `marketsvc/db/init_db.py` is a Python file that actually executes the aforementioned SQL script with SQLite.
 
@@ -113,7 +113,7 @@ You can also test out any of the other commands.
 For example, we can retrieve a customer's orders by running:
 
 ```sh
-curl http://localhost:9090/api/orders?cust_id=1
+curl http://localhost:9090/api/orders/1
 ```
 
 This should return a list of items in all of customer 1's orders.
