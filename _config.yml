@@ -1,15 +1,15 @@
 # Configurations
-title:            SQLAlchemy Workshop
-longtitle:        SQLAlchemy Workshop
-author:           Aya Elsayed
-email:            ayah.ehab11@gmail.com
+title:            Orchestrating Data Pipelines Workshop
+longtitle:        Orchestrating Data Pipelines in Python
+author:           Juan Aragon
+email:            jaaragont@gmail.com
 description: >
-  SQLAlchemy workshop
+  Orchestrating Data Pipelines workshop
 
 version:          1.0
 gitbook_version:  3.2.3
 
-url:              'https://aelsayed95.github.io/'
+url:              'https://bbgithub.dev.bloomberg.com/pages/jaragontruji/pycones-workshop/'
 baseurl:          ''
 rss:              RSS
 

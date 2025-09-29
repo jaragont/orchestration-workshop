@@ -1,7 +1,6 @@
-# SQLAlchemy Workshop
+# Orchestrating Data Pipelines Workshop
 
-This is a hands-on workshop will teach you how to use SqlAlchemy so you can manage your interaction with the database in a Pythonic way.
-It'll also teach you how to use SQLAlchemy's asyncio extension so that you can apply this knowledge to async services.
+This tutorial guides you through building robust and trustworthy data pipelines using a powerful Python-native stack. Learn how to transform raw data into reliable insights by leveraging [Dagster](https://dagster.io/) for orchestration and asset management, [pandas](https://pandas.pydata.org/) for data transformations, [Pandera](https://pandera.readthedocs.io/en/stable/#) for enforcing data contracts, and Soda for continuous data quality monitoring.
 
 ## Theme
 
