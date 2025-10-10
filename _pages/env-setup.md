@@ -15,42 +15,32 @@ layout: post
 
 ---
 
-## Repository Structure
-
-The repository contains (**TODO:** refine this section):
-
-- `/src`: Source code for the ETL pipeline
-- `/data`: datasets
-- `/requirements.txt`: Python dependencies
-
----
-
-## Working with Branches
-
-Each step of the workshop is available in a branch named `step-#-<step-title>`.
-To switch branches locally, use:
-
-```sh
-git checkout step-1-setup
-```
-
----
-
 ## Creating our Project
 
-Throughout this workshop, we'll be using an [example project to help María in her `EDA` task](https://bbgithub.dev.bloomberg.com/dortizcosta/workshop-repo).
+Throughout this workshop, we'll be using an [example project to help María in her task](https://github.com/jaragont/orchestration-workshop-tutorial).
 
-After each step, we can refer to the corresponding completed version of the code, under the branch `step-#-<step-title>`.
+After each part, we can refer to the corresponding completed version of the code, under the branch `part-#`.
 
 Now, let's get started!
 
-1. Visit the [example repo](https://bbgithub.dev.bloomberg.com/dortizcosta/workshop-repo) and **fork** the repository by clicking "Fork" > "Create a new fork".
+1. Visit the [tutorial repo](https://github.com/jaragont/orchestration-workshop-tutorial) and **fork** the repository by clicking "Fork" > "Create a new fork"
 You will be redirected to a fork of this repository in your account or organization.
 
-2. **Make sure to uncheck the box `Copy the 'main' branch only`**, to include all the branches.
+1. **Make sure to uncheck the box `Copy the 'main' branch only`**, to include all the branches.
 
-3. Once our repo is created, click on the `Code` menu, and from the `Codespaces` tab, click `Create codespace on main`.
+2. Once our repo is created, click on the `Code` menu, and from the `Codespaces` tab, click `Create codespace on main`.
 This will open the code in GitHub `Codespaces` where we will be incrementally making updates to the code.
+
+---
+
+### Repository Structure
+
+[This](https://github.com/jaragont/orchestration-workshop-tutorial) repository contains all the information required for the workshop.
+
+- `/src`: Source code for the ETL pipeline
+- `/workshop-project/basic`: basic solution of the proposed part
+- `/workshop-project/advanced`: advanced solution of the proposed part
+- `/requirements.txt`: Python dependencies
 
 ---
 
@@ -97,23 +87,3 @@ pip install -r requirements.txt
 ```
 
 ---
-
-## Recommended Extensions
-
-To make our development experience smoother, we want to enable [IntelliSense](https://code.visualstudio.com/docs/editor/intellisense). To do that for `Python`, we'd need to install the official VSCode [Python extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python).
-
-Other useful extensions:
-- [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens) for Git insights
-
-Find the Extensions tab in the left panel of `Codespaces`, and search `Python`.
-From the results list, find the extension named `Python` provided by Microsoft.
-Hit install.
-
-In the previous step, we've created a `venv` where we will be installing some extra dependencies. To ensure that `IntelliSense` will be able to recognise these dependencies, we need to point the `Python` extension to our `venv`'s Python path.
-
-To do that, once the extension has been installed, open up any python file, and on the bottom right corner of your `Codespaces` screen, you should see that `Codespaces` has detected the language to be `Python` and it shows the `Python` path of the interpreter it is currently using.
-
-Click on the path to change it.
-
-A drop down menu should appear.
-Select `Python3.12`, the version with the path `./venv/bin/python`.
