@@ -37,7 +37,7 @@ This will open the code in GitHub `Codespaces` where we will be incrementally ma
 
 [This](https://github.com/jaragont/orchestration-workshop-tutorial) repository contains all the information required for the workshop.
 
-- `/src`: Source code for the ETL pipeline
+- `/data`: data files
 - `/workshop-project/basic`: basic solution of the proposed part
 - `/workshop-project/advanced`: advanced solution of the proposed part
 - `/requirements.txt`: Python dependencies
