@@ -2,6 +2,7 @@
 title: "Part 6: Wrapping Up - What We've Learned"
 author: Daniel Ortiz, Juan Aragon
 category: Orchestrating Data Pipelines Workshop
+date: 2025-10-14
 layout: post
 ---
 
