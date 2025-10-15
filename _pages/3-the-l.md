@@ -19,6 +19,12 @@ This is where the fruits of her ETL labor are realized, and she produces a compr
 
 ---
 
+ℹ️ If you have fallen behind, you can `git checkout part_2` before starting this section.
+
+For the `advanced` section, you can the re-run `dg dev` to restart your `Dagster` webserver.
+
+---
+
 ## Data Architecture Evolution
 
 We will load and leverage our transformed data to create policy insights, completing the **"L" in ETL - Load**.

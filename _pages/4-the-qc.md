@@ -23,6 +23,12 @@ María realizes: _A successful pipeline run isn't the same as trustworthy result
 
 ---
 
+ℹ️ If you have fallen behind, you can `git checkout part_3` before starting this section.
+
+For the `advanced` section, you can the re-run `dg dev` to restart your `Dagster` webserver.
+
+---
+
 ## Data Architecture Evolution
 
 In this section, we'll enhance our pipeline by adding systematic quality validation at critical points.

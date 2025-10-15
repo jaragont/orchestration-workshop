@@ -23,6 +23,10 @@ Before orchestrating anything, María needs to get her hands on the raw data: po
 
 ---
 
+ℹ️ If you have fallen behind, you can `git checkout part_0` before starting this section.
+
+---
+
 ## Data Architecture Evolution
 
 We will retrieve the foundational data sources to feed our analysis pipeline, the **"E" in ETL - Extract**.
@@ -180,6 +184,15 @@ With `Dagster`, you can treat each raw data source as a trackable asset, and wit
 
 To use `Dagster` for asset-based data extraction and validation, follow these steps to scaffold your project and start the development server:
 
+#### 0. Create a folder to maintain the `Dagster` definitions
+
+This will be your source code for the orchestrated pipeline.
+
+```bash
+mkdir -p /workspaces/orchestration-workshop-tutorial/workshop-project/advanced
+cd /workspaces/orchestration-workshop-tutorial/workshop-project/advanced
+```
+
 #### 1. Scaffold a New Dagster Project
 
 ```bash
@@ -216,7 +229,7 @@ import pandas as pd
 @dg.asset
 def population_by_country():
     """Population by country from UN projections"""
-    return pd.read_csv("src/energy_analysis/data/population-with-un-projections.csv")
+    return pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/population-with-un-projections.csv")
 ```
 
 This makes each input visible, trackable, and versioned.
@@ -243,7 +256,7 @@ Add validation to the asset using dagster types:
 @dg.asset(dagster_type=pandera_schema_to_dagster_type(PopulationDataModel.to_schema()))
 def population_by_country():
     """Population by country from UN projections"""
-    return pd.read_csv("src/energy_analysis/data/population-with-un-projections.csv")
+    return pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/population-with-un-projections.csv")
 ```
 
 **Why Pandera?** It is a complete semantic data validation framework; at its core, it validates data schemas automatically, preventing bad data from entering your pipeline and providing clear error messages when validation fails.
@@ -269,7 +282,7 @@ def population_by_country():
 def population_by_country():
     """Population by country from UN projections"""
     return (
-        pd.read_csv("src/energy_analysis/data/population-with-un-projections.csv")
+        pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/population-with-un-projections.csv")
         .rename(
             columns={
                 "population__sex_all__age_all__variant_estimates": "population",
@@ -332,7 +345,7 @@ from energy_analysis.defs.models import (
 def population():
     """Population by country from UN projections"""
     return (
-        pd.read_csv("src/energy_analysis/data/population-with-un-projections.csv")
+        pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/population-with-un-projections.csv")
         .rename(
             columns={
                 "population__sex_all__age_all__variant_estimates": "population",
@@ -352,7 +365,7 @@ def population():
 def energy_consumption():
     """Energy consumption by country from UN projections"""
     return (
-        pd.read_csv("src/energy_analysis/data/primary-energy-cons.csv")
+        pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/primary-energy-cons.csv")
         .rename(
             columns={
                 "primary_energy_consumption__twh": "energy_consumption",
@@ -378,7 +391,7 @@ def energy_consumption():
 def renewable_coverage():
     """Renewable energy coverage by country from UN projections"""
     return (
-        pd.read_csv("src/energy_analysis/data/renewable-share-energy.csv")
+        pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/renewable-share-energy.csv")
         .rename(
             columns={
                 "renewables__pct_equivalent_primary_energy": "renewable_energy_pct",
@@ -396,7 +409,7 @@ def renewable_coverage():
 )
 def regional_grouping():
     """Regional grouping taxonomy"""
-    return pd.read_csv("src/energy_analysis/data/regional-grouping.csv")
+    return pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/regional-grouping.csv")
 
 ```
 
