@@ -54,8 +54,8 @@ Even while on `Codespaces`, it is good practice to create a `venv` for our proje
 To create and activate a `Python3.12` `venv`:
 
 ```sh
-python3.12 -m venv .venv
-source .venv/bin/activate
+python3.12 -m venv /workspaces/orchestration-workshop-tutorial/.venv
+source /workspaces/orchestration-workshop-tutorial/.venv/bin/activate
 ```
 
 > _NOTE_: You can exit out of the `venv` by typing:
