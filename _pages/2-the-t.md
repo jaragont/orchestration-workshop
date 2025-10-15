@@ -20,6 +20,14 @@ With our raw data sources properly validated and loaded, María needs to combine
 - Visualize data dependencies and pipeline lineage
 - Move from ad-hoc scripts to structured, maintainable workflows using `Dagster` assets
 
+---
+
+ℹ️ If you have fallen behind, you can `git checkout part_1` before starting this section.
+
+For the `advanced` section, you can the re-run `dg dev` to restart your `Dagster` webserver.
+
+---
+
 ## Data Architecture Evolution
 
 We will transform and enrich our starting data to create meaningful insights, the **"T" in ETL - Transform**.

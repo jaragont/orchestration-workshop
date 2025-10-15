@@ -21,6 +21,8 @@ Throughout this workshop, we'll be using an [example project to help María in h
 
 After each part, we can refer to the corresponding completed version of the code, under the branch `part_#`.
 
+**This is quite important if you fall behind, as you can start from the last complete milestone.**
+
 Now, let's get started!
 
 1. Visit the [tutorial repo](https://github.com/jaragont/orchestration-workshop-tutorial) and **fork** the repository by clicking "Fork" > "Create a new fork"
@@ -31,7 +33,6 @@ You will be redirected to a fork of this repository in your account or organizat
 2. Once our repo is created, click on the `Code` menu, and from the `Codespaces` tab, click `Create codespace on main`.
 This will open the code in GitHub `Codespaces` where we will be incrementally making updates to the code.
 
----
 
 ### Repository Structure
 
@@ -44,31 +45,17 @@ This will open the code in GitHub `Codespaces` where we will be incrementally ma
 
 ---
 
-## Running Locally
-
-If we prefer to work outside Codespaces:
-
-```sh
-git clone <our-fork-url>
-cd workshop-repo
-python3.12 -m venv ./venv
-source ./venv/bin/activate
-pip install -r requirements.txt
-```
-
----
-
 ## Creating a virtual environment
 
 We'll be installing our Python dependencies in a Python virtual environment (`venv`).
 
-While on `Codespaces`, creating a virtual environment for our project doesn't add much value, if we were developing locally or on a host shared by multiple projects, it is good practice to create a `venv` for our project's dependencies.
+Even while on `Codespaces`, it is good practice to create a `venv` for our project's dependencies.
 
 To create and activate a `Python3.12` `venv`:
 
 ```sh
-python3.12 -m venv ./venv
-source ./venv/bin/activate
+python3.12 -m venv /workspaces/orchestration-workshop-tutorial/.venv
+source /workspaces/orchestration-workshop-tutorial/.venv/bin/activate
 ```
 
 > _NOTE_: You can exit out of the `venv` by typing:
@@ -85,5 +72,19 @@ We'll be installing a few throughout this tutorial.
 ```sh
 pip install -r requirements.txt
 ```
+
+> ⚠️ This `venv` contains all your base dependencies, ensure you have not deactivated it accidentally when switching branches.
+
+---
+
+## Running Locally
+
+If we prefer to work outside `Codespaces`, you can clone your fork first:
+
+```sh
+git clone <our-fork-url>
+```
+
+The examples reference paths relative to the `Codespaces` base location; ensure you modify them as appropriate for your environment.
 
 ---
