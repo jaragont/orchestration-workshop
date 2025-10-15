@@ -19,7 +19,7 @@ layout: post
 
 Throughout this workshop, we'll be using an [example project to help María in her task](https://github.com/jaragont/orchestration-workshop-tutorial).
 
-After each part, we can refer to the corresponding completed version of the code, under the branch `part-#`.
+After each part, we can refer to the corresponding completed version of the code, under the branch `part_#`.
 
 Now, let's get started!
 
