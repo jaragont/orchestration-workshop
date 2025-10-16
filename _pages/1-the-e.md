@@ -78,15 +78,19 @@ flowchart TD
 
 ## Basic Approach (Plain Python & Pandas)
 
+For this section we will continue the work started in `workshop-project/basic/renewable_coverage_analysis.py`
+during **Part 0**.
+
 ### How to Load Data with Pandas
 
 ```python
 import pandas as pd
 
-population_df = pd.read_csv("data/population-with-un-projections.csv")
-energy_df = pd.read_csv("data/primary-energy-cons.csv")
-renewable_df = pd.read_csv("data/renewable-share-energy.csv")
-taxonomy_df = pd.read_csv("data/regional-grouping.csv")
+# Load all datasets
+population_df = pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/population-with-un-projections.csv")
+energy_df = pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/primary-energy-cons.csv")
+renewable_df = pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/renewable-share-energy.csv")
+taxonomy_df = pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/regional-grouping.csv")
 ```
 
 ### Quick Exploration
@@ -221,7 +225,7 @@ This launches the Dagster UI locally, allowing you to run, monitor, and debug yo
 
 ### Dagster for "Extract" as Assets
 
-Instead of ad-hoc loading, define each raw data source as a Dagster `Asset`:
+Instead of ad-hoc loading, define each raw data source as a Dagster `Asset`. Let's create our first asset in `workshop-project/advanced/energy-analysis/src/energy_analysis/defs/assets.py`:
 
 ```python
 import dagster as dg
@@ -233,14 +237,15 @@ def population_by_country():
     return pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/population-with-un-projections.csv")
 ```
 
-This makes each input visible, trackable, and versioned.
+This makes each input visible, trackable, and versioned. If you click on `Reload definitions` in the `Assets` tab in Dagster, you will be able to see your new asset and materialize it.
 
 ---
 
 ### Pandera for Data Contracts
 
-Define a data model for each dataset:
+Define a data model for each dataset. In order to separte models from assets, we create a `models.py` under `workshop-project/advanced/energy-analysis/src/energy_analysis/defs/`:
 
+*models.py*
 ```python
 import pandera as pa
 
@@ -253,7 +258,16 @@ class PopulationDataModel(pa.DataFrameModel):
 
 Add validation to the asset using dagster types:
 
+*assets.py*
 ```python
+import dagster as dg
+import pandas as pd
+from dagster_pandera import pandera_schema_to_dagster_type
+
+from energy_analysis.defs.models import (
+    PopulationDataModel
+)
+
 @dg.asset(dagster_type=pandera_schema_to_dagster_type(PopulationDataModel.to_schema()))
 def population_by_country():
     """Population by country from UN projections"""
@@ -278,6 +292,7 @@ def population_by_country():
 <details markdown="1">
 <summary><strong>💡 Click to reveal solution</strong></summary>
 
+*assets.py*
 ```python
 @dg.asset(dagster_type=pandera_schema_to_dagster_type(PopulationDataModel.to_schema()))
 def population_by_country():

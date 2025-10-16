@@ -24,7 +24,7 @@ In this section, we will learn to:
 
 ## Available Datasets
 
-María has access to four key datasets from [Our World in Data](https://github.com/owid/energy-data)[^1]:
+María has access to four key datasets from [Our World in Data](https://github.com/owid/energy-data)[^1]. They are all located under the `data` folder:
 
 ### 1. Population by Country (`population-with-un-projections.csv`)
 
@@ -92,14 +92,16 @@ Let's perform a quick assessment of our data availability and quality, one of th
 
 ### What does this data look like?
 
+Create a file called `renewable_coverage_analysis.py` under `workshop-project/basic/` in order to start exploring the data.
+
 ```python
 import pandas as pd
 
 # Load all datasets
-population_df = pd.read_csv("data/population-with-un-projections.csv")
-energy_df = pd.read_csv("data/primary-energy-cons.csv")
-renewable_df = pd.read_csv("data/renewable-share-energy.csv")
-taxonomy_df = pd.read_csv("data/regional-grouping.csv")
+population_df = pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/population-with-un-projections.csv")
+energy_df = pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/primary-energy-cons.csv")
+renewable_df = pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/renewable-share-energy.csv")
+taxonomy_df = pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/regional-grouping.csv")
 
 # Quick exploration
 print("Dataset shapes:")
