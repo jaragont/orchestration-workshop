@@ -109,7 +109,7 @@ energy_with_population = energy_breakdown.merge(
 ```python
 # Manually define regions using taxonomy
 entities_of_interest = energy_with_population.merge(
-    taxonomy_df, on="entity_code"
+    regional_grouping, on="entity_code"
 ).assign(
     relative_contrib_in_region=lambda x: x["energy_consumption_gwh"]
     / x.groupby(["region_entity_code", "year"])["energy_consumption_gwh"].transform("sum")
@@ -165,6 +165,7 @@ In this advanced approach, we'll restructure our complex pandas transformations 
 
 Break down the complex transformations into discrete, trackable Dagster assets:
 
+*models.py*
 ```python
 class EnergyBreakdownDataModel(EnergyConsumptionDataModel):
     renewable_energy_pct: float = pa.Field(description="Renewable energy coverage in %")
@@ -175,8 +176,10 @@ class EnergyBreakdownDataModel(EnergyConsumptionDataModel):
     fossil_energy_consumption: float = pa.Field(
         description="Fossil energy consumption in GWh"
     )
+```
 
-
+*assets.py*
+```python
 @dg.asset(
     dagster_type=pandera_schema_to_dagster_type(EnergyBreakdownDataModel.to_schema())
 )
@@ -204,8 +207,94 @@ Let's convert our complex pandas transformations into structured Dagster assets 
 <details markdown="1">
 <summary><strong>💡 Click to reveal solution</strong></summary>
 
-
+*assets.py*
 ```python
+import dagster as dg
+import pandas as pd
+from dagster_pandera import pandera_schema_to_dagster_type
+from energy_analysis.defs.utils import get_dagster_type
+
+from energy_analysis.defs.models import (
+    PopulationDataModel,
+    EnergyConsumptionDataModel,
+    RenewableCoverageDataModel,
+    RegionalGroupingDataModel,
+    EnergyBreakdownDataModel,
+    EnergyBreakdownWithPopulationDataModel,
+    EnergyBreakdownPerCapitaDataModel,
+)
+
+
+@dg.asset(dagster_type=pandera_schema_to_dagster_type(PopulationDataModel.to_schema()))
+def population():
+    """Population by country from UN projections"""
+    return (
+        pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/population-with-un-projections.csv")
+        .rename(
+            columns={
+                "population__sex_all__age_all__variant_estimates": "population",
+                "Entity": "entity",
+                "Code": "entity_code",
+                "Year": "year",
+            }
+        )
+        .dropna(subset=["population"])
+        .astype({"year": int, "population": int, "entity_code": str, "entity": str})
+    )
+
+
+@dg.asset(
+    dagster_type=pandera_schema_to_dagster_type(EnergyConsumptionDataModel.to_schema())
+)
+def energy_consumption():
+    """Energy consumption by country from UN projections"""
+    return (
+        pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/primary-energy-cons.csv")
+        .rename(
+            columns={
+                "primary_energy_consumption__twh": "energy_consumption",
+                "Entity": "entity",
+                "Code": "entity_code",
+                "Year": "year",
+            }
+        )
+        .astype(
+            {
+                "year": int,
+                "energy_consumption": float,
+                "entity_code": str,
+                "entity": str,
+            }
+        )
+    )
+
+
+@dg.asset(
+    dagster_type=pandera_schema_to_dagster_type(RenewableCoverageDataModel.to_schema())
+)
+def renewable_coverage():
+    """Renewable energy coverage by country from UN projections"""
+    return (
+        pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/renewable-share-energy.csv")
+        .rename(
+            columns={
+                "renewables__pct_equivalent_primary_energy": "renewable_energy_pct",
+                "Entity": "entity",
+                "Code": "entity_code",
+                "Year": "year",
+            }
+        )
+        .assign(renewable_energy_pct=lambda x: x["renewable_energy_pct"] / 100)
+    )
+
+
+@dg.asset(
+    dagster_type=pandera_schema_to_dagster_type(RegionalGroupingDataModel.to_schema())
+)
+def regional_grouping():
+    """Regional grouping taxonomy"""
+    return pd.read_csv("/workspaces/orchestration-workshop-tutorial/data/regional-grouping.csv")
+
 
 @dg.asset(
     dagster_type=pandera_schema_to_dagster_type(EnergyBreakdownDataModel.to_schema())
@@ -292,7 +381,83 @@ def energy_breakdown_per_capita(
         fossil_energy_per_capita=lambda x: x["fossil_energy_consumption"]
         / x["population"],
     )
+```
 
+*models.py*
+```python
+import pandera as pa
+
+
+class PopulationDataModel(pa.DataFrameModel):
+    entity: str = pa.Field(description="Entity name")
+    entity_code: str = pa.Field(description="Country code")
+    year: int = pa.Field(description="Year of the population estimate")
+    population: int = pa.Field(description="Population estimate")
+
+
+class EnergyConsumptionDataModel(pa.DataFrameModel):
+    entity: str = pa.Field(description="Entity name")
+    entity_code: str = pa.Field(description="Country code")
+    year: int = pa.Field(description="Year of the consumption")
+    energy_consumption: float = pa.Field(description="Energy consumption in TWh")
+
+
+class RenewableCoverageDataModel(pa.DataFrameModel):
+    entity: str = pa.Field(description="Entity name")
+    entity_code: str = pa.Field(description="Country code", nullable=True)
+    year: int = pa.Field(description="Year of the estimate")
+    renewable_energy_pct: float = pa.Field(description="Renewable energy coverage in %")
+
+
+class RegionalGroupingDataModel(pa.DataFrameModel):
+    region_entity_code: str = pa.Field(description="Region entity code")
+    region_name: str = pa.Field(description="Region name")
+    entity_code: str = pa.Field(description="Country code")
+
+
+class EnergyBreakdownDataModel(EnergyConsumptionDataModel):
+    renewable_energy_pct: float = pa.Field(description="Renewable energy coverage in %")
+    fossil_energy_pct: float = pa.Field(description="Fossil energy coverage in %")
+    renewable_energy_consumption: float = pa.Field(
+        description="Renewable energy consumption in GWh"
+    )
+    fossil_energy_consumption: float = pa.Field(
+        description="Fossil energy consumption in GWh"
+    )
+
+
+class EnergyBreakdownWithPopulationDataModel(EnergyBreakdownDataModel):
+    population: int = pa.Field(description="Population", nullable=True)
+
+
+class EnergyBreakdownPerCapitaDataModel(EnergyBreakdownDataModel):
+    population: int = pa.Field(description="Population", nullable=True)
+    energy_consumption_per_capita: float = pa.Field(
+        description="Energy consumption per capita in GWh", nullable=True
+    )
+    renewable_energy_per_capita: float = pa.Field(
+        description="Renewable energy consumption per capita in GWh", nullable=True
+    )
+    fossil_energy_per_capita: float = pa.Field(
+        description="Fossil energy consumption per capita in GWh", nullable=True
+    )
+```
+
+*utils.py*
+```python
+from dagster_pandera import pandera_schema_to_dagster_type
+import pandera as pa
+
+
+def get_dagster_type(model: pa.DataFrameModel, asset_name: str | None = None) -> None:
+    dagster_type = None
+    schema = model.to_schema()
+    if asset_name:
+        schema.title = f"{model.Config.name}_{asset_name}"
+    else:
+        schema.title = model.Config.name
+    dagster_type = pandera_schema_to_dagster_type(schema)
+    return dagster_type
 ```
 
 </details>
