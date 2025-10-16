@@ -12,6 +12,7 @@ mermaid: true
 Before orchestrating anything, María needs to get her hands on the raw data: population, energy consumption, renewable share, and country taxonomy. Let's see how this is typically done.
 
 ![Illustration of María, a data analyst at a UN-affiliated organization](../../assets/maria-part-1.png)
+*Source of generated image on this page: Google Gemini*
 
 ### What We Will Learn
 

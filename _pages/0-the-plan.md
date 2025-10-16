@@ -12,6 +12,7 @@ mermaid: true
 Before diving into extraction and transformation, María needs to understand what data she has available and plan her transformation pipeline. Let's explore the datasets and map out the transformation strategy needed to answer her research question: **"How does renewable energy adoption in Iberia compare to North America?"**
 
 ![Illustration of María, a data analyst at a UN-affiliated organization](../../assets/maria-part-0.png)
+*Source of generated image on this page: Google Gemini*
 
 ### What We Will Learn
 

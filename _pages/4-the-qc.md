@@ -12,6 +12,7 @@ mermaid: true
 María's renewable energy coverage analysis pipeline is running beautifully. During her first UN policy presentation, a senior analyst asks: **_Can we trust the energy consumption estimates are accurate?_**
 
 ![Illustration of María, a data analyst at a UN-affiliated organization](../../assets/maria-part-4.png)
+*Source of generated image on this page: Google Gemini*
 
 María realizes: _A successful pipeline run isn't the same as trustworthy results. Quality Control must be explicit and actionable._
 

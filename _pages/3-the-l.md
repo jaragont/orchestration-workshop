@@ -12,6 +12,7 @@ mermaid: true
 This is where the fruits of her ETL labor are realized, and she produces a comprehensive Excel report as part of her exploratory data analysis. The "L" in ETL isn't just about loading data into storage - it's about making insights accessible and actionable for policy decisions.
 
 ![Illustration of María, a data analyst at a UN-affiliated organization](../../assets/maria-part-3.png)
+*Source of generated image on this page: Google Gemini*
 
 ### What We Will Learn
 

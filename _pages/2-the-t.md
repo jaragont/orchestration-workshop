@@ -12,6 +12,7 @@ mermaid: true
 With our raw data sources properly validated and loaded, María needs to combine and transform this data to answer her policy questions. This involves merging datasets, calculating derived metrics, and creating regional aggregates for comparison.
 
 ![Illustration of María, a data analyst at a UN-affiliated organization](../../assets/maria-part-2.png)
+*Source of generated image on this page: Google Gemini*
 
 ### What We Will Learn
 

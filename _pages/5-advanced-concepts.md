@@ -11,6 +11,7 @@ layout: post
 With a working ETL pipeline and quality control in place, María is ready to take her orchestration skills to the next level. In production, there are more advanced concepts and tools to master. In this section, we introduce those topics, with examples and links to official documentation for further exploration.
 
 ![Illustration of María, a data analyst at a UN-affiliated organization](../../assets/maria-part-5.png)
+*Source of generated image on this page: Google Gemini*
 
 ---
 

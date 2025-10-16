@@ -12,7 +12,7 @@ permalink: /
 María is a data analyst at a UN-affiliated organization focused on renewable energy. María’s mission: conduct an exploratory data analysis (EDA) to compare renewable energy adoption between the Iberia region and North American countries. This analysis is vital for identifying trends, informing policy, and assessing progress in renewable initiatives.
 
 ![Illustration of María, a data analyst at a UN-affiliated organization](assets/maria-image.jpg)
-*María, our guide through the data pipeline adventure!*
+*Source of generated image on this page: Google Gemini*
 
 ### The challenge
 
