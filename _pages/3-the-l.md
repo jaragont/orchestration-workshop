@@ -79,9 +79,27 @@ flowchart TD
 
 ## Basic Approach: Manual Output & Ad-hoc Analysis
 
+### Loading the data
+
+A basic way to simply export the data is to create an output file.
+
+```python
+energy_breakdown_per_capita.to_csv('per_capita_metrics.csv')
+```
+
+From `Dagster` we can also be done through a materializable asset.
+
+```python
+@dg.asset()
+def export_energy_breakdown(energy_breakdown_per_capita):
+    """Export data as pure CSV"""
+    energy_breakdown_per_capita.to_csv('per_capita_metrics.csv')
+```
+
+
 ### Create Excel Report
 
-The comprehensive energy report consists of seven tabs:
+Another common case comprehensive energy report consists of seven tabs:
 
 - **Tab 1**: Top 10 regions by year with highest fossil energy consumption
 - **Tab 2**: Top 10 regions by year with highest renewable energy consumption
@@ -92,6 +110,8 @@ The comprehensive energy report consists of seven tabs:
 - **Tab 7**: Raw data and source information
 
 ```python
+from openpyxl.chart import LineChart, Reference
+
 filename = "energy_analysis_report.xlsx"
 with pd.ExcelWriter(filename, engine="openpyxl") as writer:
     latest_year_with_population = per_capita_metrics.loc[
@@ -205,7 +225,7 @@ with pd.ExcelWriter(filename, engine="openpyxl") as writer:
     # Tab 4: Full raw data
     per_capita_metrics.to_excel(writer, sheet_name="Raw_Data", index=False)
 
- print(f"Excel report exported to: {filename}")
+print(f"Excel report exported to: {filename}")
 ```
 
 #### Problem Highlight
