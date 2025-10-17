@@ -84,16 +84,16 @@ flowchart TD
 A basic way to simply export the data is to create an output file.
 
 ```python
-per_capita_metrics.to_csv('per_capita_metrics.csv')
+energy_breakdown_per_capita.to_csv('per_capita_metrics.csv')
 ```
 
 From `Dagster` we can also be done through a materializable asset.
 
 ```python
 @dg.asset()
-def export_analysis_report(energy_breakdown_per_capita):
-    """Export analysis report to Excel with multiple tabs and charts"""
-    per_capita_metrics.to_csv('per_capita_metrics.csv')
+def export_energy_breakdown(energy_breakdown_per_capita):
+    """Export data as pure CSV"""
+    energy_breakdown_per_capita.to_csv('per_capita_metrics.csv')
 ```
 
 
